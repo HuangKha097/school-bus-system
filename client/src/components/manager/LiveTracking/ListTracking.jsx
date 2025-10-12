@@ -33,7 +33,7 @@ const List = ({ endAddress, setEndAddress }) => {
         </tr>
       </thead>
       <tbody>
-        {buses.map((item) => (
+        {buses.map((item, number) => (
           <tr
             key={item.busNumber}
             onClick={() => {
@@ -42,8 +42,8 @@ const List = ({ endAddress, setEndAddress }) => {
             }}
           >
             <td>{item.busNumber}</td>
-            <td>{item.driver || "Chưa có"}</td>
-            <td>{item.route || "Chưa có"}</td>
+            <td>{item.driver || item.driver?.fullName || "Chưa có"}</td>
+            <td>{item.route || item.driver?.fullName || "Chưa có"}</td>
             <td>
               <span
                 className={cx(

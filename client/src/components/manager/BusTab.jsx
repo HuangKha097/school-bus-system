@@ -13,7 +13,7 @@ const BusTab = () => {
   const [busDetail, setBusDetail] = useState({
     busId: "",
     driver: "",
-    route: "",
+    routeNumber: "",
     licensePlate: "",
     busStatus: "",
     capacity: 0,

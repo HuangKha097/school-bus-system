@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import User from "../models/UserModel.js";
+
 import { generateToken } from "../lib/utils.js";
 
 // Tạo tài khoản mới
@@ -143,20 +144,30 @@ export const updateDriverInfo = async (req, res) => {
   }
 };
 
-// Cập nhật thông tin phụ huynh (con, xe bus...)
+// Cập nhật thông tin phụ huynh/ con
 export const updateParentInfo = async (req, res) => {
-  const { userId, parentInfo } = req.body;
+  const { parentInfo } = req.body;
+  const { parentPhone } = req.params;
+
   try {
-    const user = await User.findById(userId);
-    if (!user || user.role !== "parent") {
-      return res.json({ success: false, message: "User is not a parent" });
+    // tìm và cập nhật trực tiếp
+    const user = await User.findOneAndUpdate(
+      { phone: parentPhone, role: "parent" },
+      { $set: { parentInfo } },
+      { new: true } // trả về document mới sau khi update
+    );
+
+    if (!user) {
+      return res.json({ success: false, message: "Parent not found" });
     }
 
-    user.parentInfo = { ...user.parentInfo, ...parentInfo };
-    await user.save();
-
-    res.json({ success: true, data: user, message: "Parent info updated" });
+    res.json({
+      success: true,
+      data: user,
+      message: "Parent info updated successfully",
+    });
   } catch (error) {
+    console.error(error);
     res.json({ success: false, message: error.message });
   }
 };
@@ -181,6 +192,56 @@ export const findDriverByDriverNumber = async (req, res) => {
   } catch (error) {
     console.log(error);
 
+    return res.json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const findStudentsByGrade = async (req, res) => {
+  try {
+    const { grade } = req.params;
+
+    if (!grade) {
+      return res.json({
+        success: false,
+        message: "Grade parameter is required",
+      });
+    }
+
+    const parents = await User.find({
+      "parentInfo.children.grade": { $regex: `^${grade}$`, $options: "i" },
+    });
+
+    // Gom tất cả học sinh đúng lớp lại
+    const students = parents.flatMap((parent) =>
+      parent.parentInfo.children
+        .filter((child) => child.grade?.toLowerCase() === grade?.toLowerCase())
+        .map((child) => ({
+          _id: child._id,
+          name: child.name,
+          grade: child.grade,
+          status: child.status,
+          parentName: parent.fullName,
+          parentPhone: parent.phone,
+        }))
+    );
+    console.log(students);
+
+    if (students.length === 0) {
+      return res.json({
+        success: false,
+        message: "Student dose not exists",
+      });
+    }
+    return res.json({
+      success: true,
+      message: "Find Successfully",
+      students,
+    });
+  } catch (error) {
+    console.log(error);
     return res.json({
       success: false,
       message: error.message,

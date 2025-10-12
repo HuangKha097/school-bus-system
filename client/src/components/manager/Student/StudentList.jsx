@@ -13,6 +13,14 @@ const StudentList = ({ setStudentDetail, studentDetail, student }) => {
       try {
         const res = await UserService.getUserByRole("parent");
         console.log("API parents:", res);
+        console.log("First parent:", res.data[0]);
+        console.log(
+          "Children of first parent:",
+          res.data[0]?.parentInfo?.children
+        );
+
+        console.log("API parents:", res);
+        console.log("API :", student);
 
         if (res?.success && Array.isArray(res.data)) {
           // Gộp tất cả học sinh từ các phụ huynh
@@ -23,6 +31,7 @@ const StudentList = ({ setStudentDetail, studentDetail, student }) => {
               parentPhone: parent.phone,
             }))
           );
+
           setStudents(allChildren);
         } else {
           console.warn("Unexpected API format:", res);
@@ -32,10 +41,10 @@ const StudentList = ({ setStudentDetail, studentDetail, student }) => {
       }
     };
     fetchStudentList();
-  }, [studentDetail]);
+  }, [student, studentDetail]);
 
   // Nếu có tìm kiếm, chỉ hiển thị 1 học sinh
-  const displayStudents = student ? [student] : students;
+  const displayStudents = student ? student : students;
 
   return (
     <table className={cx("table")}>
@@ -51,7 +60,7 @@ const StudentList = ({ setStudentDetail, studentDetail, student }) => {
       <tbody>
         {displayStudents.map((item, index) => (
           <tr
-            key={item.studentNumber || index}
+            key={item._id || index}
             onClick={() =>
               setStudentDetail({
                 _id: item._id,

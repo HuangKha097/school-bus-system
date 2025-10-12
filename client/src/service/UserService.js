@@ -46,3 +46,24 @@ export const findDriverByDriverNumber = async (driverNumber) => {
     console.log(error);
   }
 };
+export const findStudentsByGrade = async (grade) => {
+  try {
+    const res = await axios.get(
+      `http://localhost:5000/api/user/find-students-by-grade/${grade}`
+    );
+    return res.data;
+  } catch (error) {
+    console.log(error);
+  }
+};
+export const updateStudent = async ({ parentPhone, parentInfo }) => {
+  try {
+    const res = await axios.put(
+      `http://localhost:5000/api/user/update-student/${parentPhone}`,
+      { parentInfo }
+    );
+    return res.data;
+  } catch (error) {
+    console.log(error);
+  }
+};

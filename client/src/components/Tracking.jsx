@@ -11,7 +11,7 @@ import axios from "axios";
 import "leaflet/dist/leaflet.css";
 import classNames from "classnames/bind";
 import styles from "../assets/css/common/Tracking.module.scss";
-import { busStationsWithCoordinates } from "../service/BusService.js";
+import { busStationsWithCoordinates } from "../service/RouteService.js";
 
 const cx = classNames.bind(styles);
 

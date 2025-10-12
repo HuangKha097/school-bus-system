@@ -14,6 +14,8 @@ const List = ({ bus, setBusDetail, busDetail }) => {
     const fetchBuses = async () => {
       try {
         const response = await BusService.getAll();
+        console.log(response?.data);
+
         setBuses(response?.data || []);
       } catch (error) {
         console.error("Fetch buses error:", error);
@@ -35,15 +37,15 @@ const List = ({ bus, setBusDetail, busDetail }) => {
         </tr>
       </thead>
       <tbody>
-        {displayBuses.map((item) => (
+        {displayBuses.map((item, index) => (
           <tr
-            key={item._id}
+            key={index}
             onClick={() =>
               setBusDetail({
                 busNumber: item.busNumber,
                 driver: item.driver,
                 licensePlate: item.licensePlate,
-                route: item.route,
+                routeNumber: item.routeNumber,
                 busStatus: item.busStatus,
                 capacity: item.capacity || 0,
                 currentStudents: item.student || 0,
@@ -52,8 +54,9 @@ const List = ({ bus, setBusDetail, busDetail }) => {
             }
           >
             <td>{item.busNumber}</td>
-            <td>{item.driver || "Chưa có"}</td>
-            <td>{item.route || "Chưa có"}</td>
+            <td>{item.fullName || "Chưa có"}</td>
+            <td>{item.name || item.routeNumber || "Chưa có"}</td>
+
             <td>
               <span
                 className={cx(

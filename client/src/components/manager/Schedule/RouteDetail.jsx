@@ -27,7 +27,11 @@ const RouteDetail = ({ routeDetail, setRouteDetail }) => {
 
       <div className={cx("row")}>
         <span className={cx("label")}>Route ID:</span>
-        <span className={cx("value")}>{data.routeId}</span>
+        <span className={cx("value")}>{data.routeNumber}</span>
+      </div>
+      <div className={cx("row")}>
+        <span className={cx("label")}>Route Name:</span>
+        <span className={cx("value")}>{data.name}</span>
       </div>
 
       <div className={cx("row")}>
@@ -78,9 +82,7 @@ const RouteDetail = ({ routeDetail, setRouteDetail }) => {
             />
           </>
         ) : (
-          <span className={cx("value")}>
-            {data.startTime} - {data.endTime}
-          </span>
+          <span className={cx("value")}>{data.time}</span>
         )}
       </div>
 
@@ -93,18 +95,6 @@ const RouteDetail = ({ routeDetail, setRouteDetail }) => {
             </div>
           )) || <span>N/A</span>}
         </div>
-      </div>
-
-      <div className={cx("row")}>
-        <span className={cx("label")}>Status:</span>
-        {isEditing ? (
-          <select name="status" value={data.status} onChange={handleChange}>
-            <option value="Đang hoạt động">Đang hoạt động</option>
-            <option value="Tạm ngưng">Tạm ngưng</option>
-          </select>
-        ) : (
-          <span className={cx("value")}>{data.status}</span>
-        )}
       </div>
 
       <div className={cx("btnGroup")}>

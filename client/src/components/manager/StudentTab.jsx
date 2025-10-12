@@ -12,16 +12,19 @@ const StudentTab = () => {
   const [student, setStudent] = useState(null);
   const [studentDetail, setStudentDetail] = useState({
     _id: "",
+    parentId: "",
     fullName: "",
     className: "",
     status: "",
     parentName: "",
     parentPhone: "",
   });
+  console.log(searchValue);
+  console.log(student);
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
-      getStudentByStudentNumber();
+      findStudentsByGrade(searchValue);
     }
   };
 
@@ -33,34 +36,26 @@ const StudentTab = () => {
     }
   };
 
-  // const getStudentByStudentNumber = async () => {
-  //   try {
-  //     if (!searchValue.trim()) {
-  //       setStudent(null);
-  //       return;
-  //     }
+  const findStudentsByGrade = async () => {
+    try {
+      if (!searchValue.trim()) {
+        setStudent(null);
+        return;
+      }
 
-  //     // Gọi API: tìm student theo mã hoặc tên (qua parent)
-  //     const res = await UserService.findStudentByNumber(searchValue);
+      const res = await UserService.findStudentsByGrade(searchValue);
 
-  //     console.log("res: ", res?.student);
+      console.log("res: ", res);
 
-  //     if (res?.success && res?.student) {
-  //       setStudent(res.student);
-  //       setStudentDetail({
-  //         _id: res.student._id,
-  //         fullName: res.student.fullName,
-  //         className: res.student.className,
-  //         parentName: res.student.parentName,
-  //         parentPhone: res.student.parentPhone,
-  //       });
-  //     } else {
-  //       setStudent(null);
-  //     }
-  //   } catch (error) {
-  //     console.error("Search student error:", error);
-  //   }
-  // };
+      if (res?.success && res?.students) {
+        setStudent(res?.students);
+      } else {
+        setStudent(null);
+      }
+    } catch (error) {
+      console.error("Search student error:", error);
+    }
+  };
 
   return (
     <div className={cx("tab-wrapper")}>

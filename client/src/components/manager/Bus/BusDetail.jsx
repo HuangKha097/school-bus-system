@@ -2,12 +2,28 @@ import React, { useState, useEffect } from "react";
 import classNames from "classnames/bind";
 import styles from "../../../assets/css/manager/BusDetail.module.scss";
 import * as BusService from "../../../service/BusService";
+import * as RouteService from "../../../service/RouteService";
+import * as UserService from "../../../service/UserService";
 import toast, { Toaster } from "react-hot-toast";
 const cx = classNames.bind(styles);
 
 const BusDetail = ({ busDetail, setBusDetail }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [busUpdate, setBusUpdate] = useState(busDetail);
+  const [drivers, setDriver] = useState([]);
+
+  useEffect(() => {
+    const fetchDrivers = async () => {
+      try {
+        const res = await UserService.getUserByRole("driver");
+        setDriver(res?.data);
+        console.log(res?.data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchDrivers();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -70,14 +86,24 @@ const BusDetail = ({ busDetail, setBusDetail }) => {
       <div className={cx("row")}>
         <span className={cx("label")}>Driver:</span>
         {isEditing ? (
-          <input
+          <select
             type="text"
             name="driver"
             value={busUpdate.driver || ""}
             onChange={handleChange}
-          />
+          >
+            {drivers.map((item, index) => {
+              return (
+                <option key={index} value={item.email}>
+                  {item.fullName || item.driver?.fullName}
+                </option>
+              );
+            })}
+          </select>
         ) : (
-          <span className={cx("value")}>{busDetail.driver}</span>
+          <span className={cx("value")}>
+            {busDetail.driver?.fullName || "Chưa có"}
+          </span>
         )}
       </div>
 
@@ -90,14 +116,16 @@ const BusDetail = ({ busDetail, setBusDetail }) => {
             onChange={handleChange}
           >
             <option value="">-- Chọn tuyến xe buýt --</option>
-            {BusService.busStationsWithCoordinates.map((station, idx) => (
+            {RouteService.busStationsWithCoordinates.map((station, idx) => (
               <option key={idx} value={`${station.name}, ${station.address}`}>
                 {station.name} - {station.address}
               </option>
             ))}
           </select>
         ) : (
-          <span className={cx("value")}>{busDetail.route}</span>
+          <span className={cx("value")}>
+            {busDetail.routeNumber || "Chưa có"}
+          </span>
         )}
       </div>
 

@@ -9,6 +9,7 @@ const cx = classNames.bind(styles);
 const StudentDetail = ({ studentDetail, setStudentDetail }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [studentUpdate, setStudentUpdate] = useState(studentDetail || {});
+  console.log(studentUpdate.parentPhone);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -17,9 +18,18 @@ const StudentDetail = ({ studentDetail, setStudentDetail }) => {
 
   const handleSave = async () => {
     try {
-      const res = await UserService.updateParentInfo({
-        userId: studentUpdate.parentId,
-        parentInfo: { children: [studentUpdate] },
+      const res = await UserService.updateStudent({
+        parentPhone: studentUpdate.parentPhone,
+        parentInfo: {
+          children: [
+            {
+              name: studentUpdate.fullName,
+              grade: studentUpdate.className,
+              status: studentUpdate.status,
+              registeredBus: studentUpdate.assignedBus || null,
+            },
+          ],
+        },
       });
 
       if (res?.success) {
@@ -60,7 +70,7 @@ const StudentDetail = ({ studentDetail, setStudentDetail }) => {
           <input
             type="text"
             name="fullName"
-            value={studentUpdate.name || ""}
+            value={studentUpdate.fullName || ""}
             onChange={handleChange}
           />
         ) : (

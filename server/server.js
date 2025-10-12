@@ -4,6 +4,7 @@ import cors from "cors";
 import mongoose from "mongoose";
 import UserRouter from "./routes/UserRoutes.js";
 import BusRouter from "./routes/BusRoutes.js";
+import RouteRouter from "./routes/RouteRoutes.js";
 
 // Create express
 const app = express();
@@ -24,7 +25,7 @@ app.get("/api/status", (req, res) => {
 
 app.use("/api/user", UserRouter);
 app.use("/api/bus", BusRouter);
-// app.use("/api/student", studentRouter);
+app.use("/api/route", RouteRouter);
 // app.use("/api/message", messageRouter);
 
 // Connect to MongoDB
