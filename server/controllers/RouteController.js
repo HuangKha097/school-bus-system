@@ -115,22 +115,56 @@ export const updateRoute = async (req, res) => {
             });
         }
 
-        // Tìm tất cả bus theo busNumber để lấy ObjectId
+        //Tìm route cũ theo routeNumber
+        const oldRoute = await Route.findOne({ routeNumber });
+        if (!oldRoute) {
+            return res.json({
+                success: false,
+                message: "Route not found",
+            });
+        }
+
+        //Lấy danh sách ObjectId của các bus mới
         let busIds = [];
         if (Array.isArray(buses) && buses.length > 0) {
             const foundBuses = await Bus.find({
                 busNumber: { $in: buses },
-            }).select("_id");
-
+            }).select("_id busNumber");
             busIds = foundBuses.map((bus) => bus._id);
         }
 
-        // Cập nhật route — ghi đè toàn bộ mảng buses bằng danh sách mới
+        //Lấy danh sách bus cũ
+        const oldBusIds = oldRoute.buses.map((id) => id.toString());
+        const newBusIds = busIds.map((id) => id.toString());
+
+        //Các bus bị gỡ khỏi tuyến
+        const removedBusIds = oldBusIds.filter((id) => !newBusIds.includes(id));
+
+        //Các bus mới được thêm vào tuyến
+        const addedBusIds = newBusIds.filter((id) => !oldBusIds.includes(id));
+
+        //Cập nhật routeNumber = null cho bus bị gỡ
+        if (removedBusIds.length > 0) {
+            await Bus.updateMany(
+                { _id: { $in: removedBusIds } },
+                { $set: { routeNumber: null } }
+            );
+        }
+
+        //Cập nhật routeNumber cho bus mới thêm vào
+        if (addedBusIds.length > 0) {
+            await Bus.updateMany(
+                { _id: { $in: addedBusIds } },
+                { $set: { routeNumber } }
+            );
+        }
+
+        //Cập nhật lại route, ghi đè danh sách buses
         const result = await Route.findOneAndUpdate(
-            { routeNumber: { $regex: `^${routeNumber}$`, $options: "i" } },
+            { routeNumber },
             {
                 ...updateData,
-                buses: busIds, // ghi đè toàn bộ danh sách
+                buses: busIds,
             },
             { new: true }
         ).populate({
@@ -140,13 +174,6 @@ export const updateRoute = async (req, res) => {
                 { path: "students.parent", select: "fullName phone role" },
             ],
         });
-
-        if (!result) {
-            return res.json({
-                success: false,
-                message: "Route not found",
-            });
-        }
 
         return res.json({
             success: true,

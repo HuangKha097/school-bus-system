@@ -70,16 +70,40 @@ const RouteDetail = ({ routeDetail, setRouteDetail }) => {
         }
     };
     const handleRemoveBus = async (index) => {
+        // Lấy bus bị xoá và danh sách còn lại
+        const removedBus = busesChoose[index];
         const updated = busesChoose.filter((_, i) => i !== index);
         setBusesChoose(updated);
 
         try {
-            const res = await RouteService.updateRoute({
+            const updatePayload = {
                 routeNumber: data.routeNumber,
-                buses: updated, // gửi mảng busNumber mới
-            });
-            if (res.success) toast.success("Đã xoá xe khỏi tuyến!");
-            else toast.error("Cập nhật thất bại");
+                time: data.time,
+                buses: updated, // gửi danh sách bus còn lại
+            };
+
+            // Cập nhật route (xoá bus khỏi tuyến)
+            const res = await RouteService.updateRoute(updatePayload);
+
+            if (res?.success) {
+                //  Xoá route khỏi bus bị gỡ
+                await BusService.updateBus({
+                    busNumber: removedBus,
+                    routeNumber: null, // hoặc "" tùy backend
+                });
+
+                // Cập nhật lại thông tin cho các bus còn lại
+                for (const busNumber of updated) {
+                    await BusService.updateBus({
+                        busNumber,
+                        routeNumber: data.routeNumber,
+                    });
+                }
+
+                toast.success(`Đã xoá xe ${removedBus} khỏi tuyến!`);
+            } else {
+                toast.error("Cập nhật thất bại");
+            }
         } catch (err) {
             console.error(err);
             toast.error("Lỗi khi cập nhật tuyến xe");
