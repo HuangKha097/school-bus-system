@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import classNames from "classnames/bind";
 import styles from "../../../assets/css/manager/BusDetail.module.scss";
-import * as BusService from "../../../service/BusService";
-import * as RouteService from "../../../service/RouteService";
-import * as UserService from "../../../service/UserService";
+import * as BusService from "../../../service/BusService.js";
+import * as RouteService from "../../../service/RouteService.js";
+import * as UserService from "../../../service/UserService.js";
 import toast, { Toaster } from "react-hot-toast";
 const cx = classNames.bind(styles);
 
@@ -12,6 +12,9 @@ const BusDetail = ({ busDetail, setBusDetail }) => {
     const [busUpdate, setBusUpdate] = useState(busDetail);
     const [drivers, setDriver] = useState([]);
     const [routes, setRoutes] = useState([]);
+    const [routeName, setRouteName] = useState("");
+    console.log(routeName);
+    console.log(busDetail);
 
     useEffect(() => {
         const fetchDrivers = async () => {
@@ -42,9 +45,28 @@ const BusDetail = ({ busDetail, setBusDetail }) => {
         fetchRoute();
     }, []);
 
+    useEffect(() => {
+        const fetchRouteName = async () => {
+            try {
+                if (!busDetail?.routeNumber) return;
+                const res = await RouteService.getRouteByRouteNumber(
+                    busDetail.routeNumber
+                );
+
+                setRouteName(res?.data?.name || "Không có tên tuyến");
+            } catch (error) {
+                console.log(error);
+            }
+        };
+
+        fetchRouteName();
+    }, [busDetail?.routeNumber]);
+
     const handleSave = async () => {
         try {
             const res = await BusService.updateBus(busUpdate);
+            console.log("res:", res);
+
             if (res?.success) {
                 setBusDetail(res.data);
                 setBusUpdate(res.data);
@@ -104,9 +126,10 @@ const BusDetail = ({ busDetail, setBusDetail }) => {
                         value={busUpdate.driver || ""}
                         onChange={handleChange}
                     >
+                        <option value="">{"-----Chon 1 tai xe-----"}</option>
                         {drivers.map((item, index) => {
                             return (
-                                <option key={index} value={item.email}>
+                                <option key={index} value={item._id}>
                                     {item.fullName || item.driver?.fullName}
                                 </option>
                             );
@@ -121,12 +144,8 @@ const BusDetail = ({ busDetail, setBusDetail }) => {
 
             <div className={cx("row")}>
                 <span className={cx("label")}>Route:</span>
-
-                <span className={cx("value")}>
-                    {busDetail.routeNumber || "Chưa có"}
-                </span>
+                <span className={cx("value")}>{routeName || "Chưa có"}</span>
             </div>
-
             <div className={cx("row")}>
                 <span className={cx("label")}>Status:</span>
                 {isEditing ? (

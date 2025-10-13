@@ -24,7 +24,10 @@ const ScheduleTab = () => {
                     />
                 </label>
                 <div className={cx("bus-list")}>
-                    <RouteList setRouteDetail={setRouteDetail} />
+                    <RouteList
+                        routeDetail={routeDetail}
+                        setRouteDetail={setRouteDetail}
+                    />
                 </div>
             </div>
 

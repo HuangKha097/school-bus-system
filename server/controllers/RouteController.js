@@ -161,3 +161,36 @@ export const updateRoute = async (req, res) => {
         });
     }
 };
+
+export const findRouteByName = async (req, res) => {
+    try {
+        const { routeNumber } = req.query;
+
+        if (!routeNumber) {
+            return res.json({
+                success: false,
+                message: "Missing routeNumber",
+            });
+        }
+
+        const result = await Route.findOne({ routeNumber });
+        if (!result) {
+            return res.json({
+                success: false,
+                message: "Route does not exist",
+            });
+        }
+
+        return res.json({
+            success: true,
+            message: "Route found successfully",
+            data: result,
+        });
+    } catch (error) {
+        console.error(error);
+        return res.json({
+            success: false,
+            message: error.message,
+        });
+    }
+};

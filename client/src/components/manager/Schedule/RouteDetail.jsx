@@ -12,7 +12,7 @@ const RouteDetail = ({ routeDetail, setRouteDetail }) => {
     const [data, setData] = useState(routeDetail || {});
     const [buses, setBuses] = useState([]);
     const [busesChoose, setBusesChoose] = useState([]);
-    console.log(routeDetail);
+    console.log("detail rout: ", routeDetail);
 
     // Cập nhật khi chọn route khác
     useEffect(() => {
@@ -51,6 +51,12 @@ const RouteDetail = ({ routeDetail, setRouteDetail }) => {
             const res = await RouteService.updateRoute(updatePayload);
 
             if (res?.success) {
+                for (const busNumber of busesChoose) {
+                    await BusService.updateBus({
+                        busNumber,
+                        routeNumber: data.routeNumber,
+                    });
+                }
                 setRouteDetail(res.data);
                 setData(res.data);
                 setBusesChoose(res.data.buses?.map((b) => b.busNumber) || []);

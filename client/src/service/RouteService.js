@@ -11,6 +11,14 @@ export const getAllRoutes = async () => {
         throw error;
     }
 };
+export const getRouteByRouteNumber = async (routeNumber) => {
+    const res = await axios.get(
+        "http://localhost:5000/api/route/get-route-by-route-number",
+        { params: { routeNumber } }
+    );
+    return res.data;
+};
+
 export const updateRoute = async (data) => {
     try {
         const res = await axios.put(

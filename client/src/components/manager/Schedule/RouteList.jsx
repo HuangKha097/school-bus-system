@@ -7,7 +7,7 @@ import * as RouteService from "../../../service/RouteService.js";
 import * as BusService from "../../../service/BusService.js";
 
 const cx = classNames.bind(styles);
-const RouteList = ({ setRouteDetail }) => {
+const RouteList = ({ routeDetail, setRouteDetail }) => {
     const [routes, setRoutes] = useState([]);
 
     useEffect(() => {
@@ -21,7 +21,7 @@ const RouteList = ({ setRouteDetail }) => {
             }
         };
         fetchRoutes();
-    }, [routes]);
+    }, [routeDetail]);
 
     return (
         <table className={cx("table")}>
