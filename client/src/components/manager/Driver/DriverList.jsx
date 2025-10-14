@@ -29,6 +29,8 @@ const DriverList = ({ setDriverDetail, driverDetail, driver }) => {
   }, [driverDetail]);
 
   const displayDriver = driver ? [driver] : drivers;
+  console.log(displayDriver);
+
   return (
     <table className={cx("table")}>
       <thead>
@@ -51,7 +53,7 @@ const DriverList = ({ setDriverDetail, driverDetail, driver }) => {
                 phone: item.phone,
                 licenseNumber: item.driverInfo.licenseNumber,
                 licenseClass: item.driverInfo.licenseClass,
-                assignedBus: item.driverInfo.assignedBus || null,
+                assignedBus: item.driverInfo.assignedBus,
                 status: item.driverInfo.status,
               })
             }

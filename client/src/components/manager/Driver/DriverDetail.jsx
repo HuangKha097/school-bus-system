@@ -11,6 +11,8 @@ const DriverDetail = ({ driverDetail, setDriverDetail }) => {
   const [driverUpdate, setDriverUpdate] = useState(driverDetail || {});
   const userId = driverDetail?._id;
 
+  console.log("Driver detail: ", driverDetail);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setDriverUpdate((prev) => ({ ...prev, [name]: value }));

@@ -20,7 +20,7 @@ const DriverTab = () => {
     licenseNumber: "",
     licenseClass: "",
     status: "",
-    assignedBus: null,
+    assignedBus: "",
   });
   console.log(driverDetail);
 
@@ -50,6 +50,7 @@ const DriverTab = () => {
 
       if (res?.success && res?.user) {
         setDriver(res?.user);
+        res?.user;
         setDriverDetail({
           _id: res?.user._id,
           driverNumber: res?.user.driverInfo.driverNumber,

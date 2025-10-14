@@ -42,7 +42,9 @@ const NavBar = ({ role, setRole, userName }) => {
                   <li>Live Tracking</li>
                 </Link>
                 <li>Messages</li>
-                <li>Settings</li>
+                <Link to={"/setting"}>
+                  <li>Settings</li>
+                </Link>
               </>
             )}
 

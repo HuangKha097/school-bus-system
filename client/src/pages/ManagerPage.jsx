@@ -13,6 +13,7 @@ import DriverTab from "../components/manager/DriverTab";
 import StudentTab from "../components/manager/StudentTab";
 import TrackingTab from "../components/manager/TrackingTab";
 import ScheduleTab from "../components/manager/ScheduleTab";
+import SettingsTab from "../components/manager/SettingTab";
 
 const cx = classNames.bind(styles);
 const ManagerPage = ({ role, setRole, userName }) => {
@@ -32,6 +33,7 @@ const ManagerPage = ({ role, setRole, userName }) => {
               <Route path="/tracking" element={<TrackingTab />}>
                 <Route path=":id" element={<TrackingTab />} />
               </Route>
+              <Route path="/setting" element={<SettingsTab />}></Route>
             </Routes>
           </div>
         </div>

@@ -125,14 +125,21 @@ export const getUserByRole = async (req, res) => {
 
 // Cập nhật thông tin tài xế
 export const updateDriverInfo = async (req, res) => {
-  const { driverInfo } = req.body;
   try {
-    const user = await User.findById(req.params.userId);
+    const { driverInfo } = req.body;
+    const userId = req.params.userId;
 
-    console.log(user);
+    const user = await User.findById(userId);
 
     if (!user || user.role !== "driver") {
       return res.json({ success: false, message: "User is not a driver" });
+    }
+
+    // ép kiểu ObjectId
+    if (driverInfo.assignedBus) {
+      driverInfo.assignedBus = new mongoose.Types.ObjectId(
+        driverInfo.assignedBus
+      );
     }
 
     user.driverInfo = { ...user.driverInfo, ...driverInfo };
@@ -140,6 +147,7 @@ export const updateDriverInfo = async (req, res) => {
 
     res.json({ success: true, data: user, message: "Driver info updated" });
   } catch (error) {
+    console.error(error);
     res.json({ success: false, message: error.message });
   }
 };
