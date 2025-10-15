@@ -1,13 +1,13 @@
 import express from "express";
 import {
-  findDriverByDriverNumber,
-  getUserByRole,
-  login,
-  signUp,
-  updateDriverInfo,
-  findStudentsByGrade,
-  updateParentInfo,
-  // findStudentsByStudentNumber,
+    findDriverByDriverNumber,
+    getUserByRole,
+    login,
+    signUp,
+    updateDriverInfo,
+    findStudentsByGrade,
+    updateParentInfo,
+    // findStudentsByStudentNumber,
 } from "../controllers/UserController.js";
 
 const userRouter = express.Router();
@@ -17,8 +17,8 @@ userRouter.post("/login", login);
 userRouter.get("/get-user-by-role", getUserByRole);
 userRouter.put("/update-driver/:userId", updateDriverInfo);
 userRouter.get(
-  "/find-driver-by-driver-number/:driverNumber",
-  findDriverByDriverNumber
+    "/find-driver-by-driver-number/:driverNumber",
+    findDriverByDriverNumber
 );
 userRouter.get("/find-students-by-grade/:grade", findStudentsByGrade);
 // userRouter.get(

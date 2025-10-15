@@ -61,33 +61,35 @@ const List = ({ endAddress, setEndAddress }) => {
                 </tr>
             </thead>
             <tbody>
-                {buses.map((item, number) => (
-                    <tr
-                        key={item.busNumber}
-                        onClick={() => {
-                            navigate(`/tracking/${item.busNumber}`);
-                            fetchRouteName(item?.routeNumber);
-                        }}
-                    >
-                        <td>{item.busNumber}</td>
-                        <td>{item?.driver?.fullName || "Chưa có"}</td>
-                        <td>{item?.routeNumber || "Chưa có"}</td>
-                        <td>
-                            <span
-                                className={cx(
-                                    "status",
-                                    item.busStatus === "Đang chạy"
-                                        ? "running"
-                                        : item.status === "Bảo trì"
-                                        ? "maintenance"
-                                        : "stopped"
-                                )}
-                            >
-                                {item.busStatus}
-                            </span>
-                        </td>
-                    </tr>
-                ))}
+                {buses.map((item) =>
+                    item.routeNumber ? (
+                        <tr
+                            key={item.busNumber}
+                            onClick={() => {
+                                navigate(`/tracking/${item.busNumber}`);
+                                fetchRouteName(item?.routeNumber);
+                            }}
+                        >
+                            <td>{item.busNumber}</td>
+                            <td>{item?.driver?.fullName || "Chưa có"}</td>
+                            <td>{item?.routeNumber || "Chưa có"}</td>
+                            <td>
+                                <span
+                                    className={cx(
+                                        "status",
+                                        item.busStatus === "Đang chạy"
+                                            ? "running"
+                                            : item.status === "Bảo trì"
+                                            ? "maintenance"
+                                            : "stopped"
+                                    )}
+                                >
+                                    {item.busStatus}
+                                </span>
+                            </td>
+                        </tr>
+                    ) : null
+                )}
             </tbody>
         </table>
     );
