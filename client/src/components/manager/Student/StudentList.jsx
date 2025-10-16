@@ -10,6 +10,7 @@ const StudentList = ({
     studentDetail,
     student,
     showSelectCheck,
+    setStudentsSelected,
 }) => {
     const [students, setStudents] = useState([]);
 
@@ -48,6 +49,15 @@ const StudentList = ({
         fetchStudentList();
     }, [student, studentDetail]);
 
+    const handleSelectStudent = (student) => {
+        setStudentsSelected((prev) => {
+            if (prev.includes(student)) {
+                return prev.filter((id) => id !== student._id);
+            }
+            return [...prev, student];
+        });
+    };
+
     // Nếu có tìm kiếm, chỉ hiển thị 1 học sinh
     const displayStudents = student ? student : students;
 
@@ -80,7 +90,10 @@ const StudentList = ({
                     >
                         {showSelectCheck && (
                             <td>
-                                <input type="checkbox" />
+                                <input
+                                    type="checkbox"
+                                    onChange={() => handleSelectStudent(item)}
+                                />
                             </td>
                         )}
                         <td>{item._id || "N/A"}</td>

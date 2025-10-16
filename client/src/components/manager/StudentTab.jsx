@@ -4,6 +4,7 @@ import styles from "../../assets/css/manager/BusTab.module.scss";
 import StudentList from "./Student/StudentList";
 import StudentDetail from "./Student/StudentDetail";
 import * as UserService from "../../service/UserService";
+import Filter from "../Filter.jsx";
 
 const cx = classNames.bind(styles);
 
@@ -70,6 +71,12 @@ const StudentTab = () => {
                         onKeyDown={handleKeyDown}
                     />
                 </label>
+                <div className={cx("filter-wrapper")}>
+                    <Filter
+                        firstTitle={"By class"}
+                        secondTitle={"By parent phone"}
+                    />
+                </div>
                 <div className={cx("bus-list")}>
                     <StudentList
                         student={student}
