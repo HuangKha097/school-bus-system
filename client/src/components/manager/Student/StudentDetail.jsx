@@ -23,6 +23,7 @@ const StudentDetail = ({ studentDetail, setStudentDetail }) => {
         parentInfo: {
           children: [
             {
+              studentNumber: studentUpdate.studentNumber,
               name: studentUpdate.fullName,
               grade: studentUpdate.className,
               status: studentUpdate.status,
@@ -55,8 +56,8 @@ const StudentDetail = ({ studentDetail, setStudentDetail }) => {
       <h4>Student Detail</h4>
 
       <div className={cx("row")}>
-        <span className={cx("label")}>Student ID:</span>
-        <span className={cx("value")}>{studentUpdate._id}</span>
+        <span className={cx("label")}>Student Number:</span>
+        <span className={cx("value")}>{studentUpdate.studentNumber}</span>
       </div>
 
       <div className={cx("row")}>

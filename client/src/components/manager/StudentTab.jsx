@@ -9,90 +9,94 @@ import Filter from "../Filter.jsx";
 const cx = classNames.bind(styles);
 
 const StudentTab = () => {
-    const [searchValue, setSearchValue] = useState("");
-    const [student, setStudent] = useState(null);
-    const [studentDetail, setStudentDetail] = useState({
-        _id: "",
-        parentId: "",
-        fullName: "",
-        className: "",
-        status: "",
-        parentName: "",
-        parentPhone: "",
-    });
-    console.log(searchValue);
-    console.log(student);
+  const [ActiveFirstTitle, setActiveFirstTitle] = useState(false);
 
-    const handleKeyDown = (e) => {
-        if (e.key === "Enter") {
-            findStudentsByGrade(searchValue);
-        }
-    };
+  const [searchValue, setSearchValue] = useState("");
+  const [student, setStudent] = useState(null);
+  const [studentDetail, setStudentDetail] = useState({
+    _id: "",
+    studentNumber: "",
+    parentId: "",
+    fullName: "",
+    className: "",
+    status: "",
+    parentName: "",
+    parentPhone: "",
+  });
+  console.log(searchValue);
+  console.log(student);
 
-    const handleChange = (e) => {
-        const value = e.target.value;
-        setSearchValue(value);
-        if (!value.trim()) {
-            setStudent(null); // reset khi input trống
-        }
-    };
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      findStudentsByGrade(searchValue);
+    }
+  };
 
-    const findStudentsByGrade = async () => {
-        try {
-            if (!searchValue.trim()) {
-                setStudent(null);
-                return;
-            }
+  const handleChange = (e) => {
+    const value = e.target.value;
+    setSearchValue(value);
+    if (!value.trim()) {
+      setStudent(null); // reset khi input trống
+    }
+  };
 
-            const res = await UserService.findStudentsByGrade(searchValue);
+  const findStudentsByGrade = async () => {
+    try {
+      if (!searchValue.trim()) {
+        setStudent(null);
+        return;
+      }
 
-            console.log("res: ", res);
+      const res = await UserService.findStudentsByGrade(searchValue);
 
-            if (res?.success && res?.students) {
-                setStudent(res?.students);
-            } else {
-                setStudent(null);
-            }
-        } catch (error) {
-            console.error("Search student error:", error);
-        }
-    };
+      console.log("res: ", res);
 
-    return (
-        <div className={cx("tab-wrapper")}>
-            <div className={cx("left-block")}>
-                <label htmlFor="search" className={cx("search")}>
-                    <input
-                        type="text"
-                        name="search"
-                        placeholder="Find student"
-                        value={searchValue}
-                        onChange={handleChange}
-                        onKeyDown={handleKeyDown}
-                    />
-                </label>
-                <div className={cx("filter-wrapper")}>
-                    <Filter
-                        firstTitle={"By class"}
-                        secondTitle={"By parent phone"}
-                    />
-                </div>
-                <div className={cx("bus-list")}>
-                    <StudentList
-                        student={student}
-                        setStudentDetail={setStudentDetail}
-                        studentDetail={studentDetail}
-                    />
-                </div>
-            </div>
-            <div className={cx("right-block")}>
-                <StudentDetail
-                    studentDetail={studentDetail}
-                    setStudentDetail={setStudentDetail}
-                />
-            </div>
+      if (res?.success && res?.students) {
+        setStudent(res?.students);
+      } else {
+        setStudent(null);
+      }
+    } catch (error) {
+      console.error("Search student error:", error);
+    }
+  };
+
+  return (
+    <div className={cx("tab-wrapper")}>
+      <div className={cx("left-block")}>
+        <label htmlFor="search" className={cx("search")}>
+          <input
+            type="text"
+            name="search"
+            placeholder="Find student"
+            value={searchValue}
+            onChange={handleChange}
+            onKeyDown={handleKeyDown}
+          />
+        </label>
+        <div className={cx("filter-wrapper")}>
+          <Filter
+            firstTitle={"By class"}
+            ActiveFirstTitle={ActiveFirstTitle}
+            setActiveFirstTitle={setActiveFirstTitle}
+          />
         </div>
-    );
+        <div className={cx("bus-list")}>
+          <StudentList
+            student={student}
+            setStudentDetail={setStudentDetail}
+            studentDetail={studentDetail}
+          />
+        </div>
+      </div>
+      <div className={cx("right-block")}>
+        <StudentDetail
+          studentDetail={studentDetail}
+          setStudentDetail={setStudentDetail}
+        />
+      </div>
+    </div>
+  );
 };
 
 export default StudentTab;

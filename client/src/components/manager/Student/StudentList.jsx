@@ -6,119 +6,132 @@ import * as UserService from "../../../service/UserService";
 const cx = classNames.bind(styles);
 
 const StudentList = ({
-    setStudentDetail,
-    studentDetail,
-    student,
-    showSelectCheck,
-    setStudentsSelected,
+  setStudentDetail,
+  studentDetail,
+  student,
+  showSelectCheck,
+  setStudentsSelected,
+  studentsSelected,
+  isSelectAll,
+  studentPopUp,
 }) => {
-    const [students, setStudents] = useState([]);
+  const [students, setStudents] = useState([]);
 
-    useEffect(() => {
-        const fetchStudentList = async () => {
-            try {
-                const res = await UserService.getUserByRole("parent");
-                console.log("API parents:", res);
-                console.log("First parent:", res.data[0]);
-                console.log(
-                    "Children of first parent:",
-                    res.data[0]?.parentInfo?.children
-                );
+  useEffect(() => {
+    const fetchStudentList = async () => {
+      try {
+        const res = await UserService.getUserByRole("parent");
+        console.log("API parents:", res);
+        console.log("First parent:", res.data[0]);
+        console.log(
+          "Children of first parent:",
+          res.data[0]?.parentInfo?.children
+        );
 
-                console.log("API parents:", res);
-                console.log("API :", student);
+        console.log("API parents:", res);
+        console.log("API :", student);
 
-                if (res?.success && Array.isArray(res.data)) {
-                    // Gộp tất cả học sinh từ các phụ huynh
-                    const allChildren = res.data.flatMap((parent) =>
-                        (parent.parentInfo?.children || []).map((child) => ({
-                            ...child,
-                            parentName: parent.fullName,
-                            parentPhone: parent.phone,
-                        }))
-                    );
+        if (res?.success && Array.isArray(res.data)) {
+          // Gộp tất cả học sinh từ các phụ huynh
+          const allChildren = res.data.flatMap((parent) =>
+            (parent.parentInfo?.children || []).map((child) => ({
+              ...child,
+              parentName: parent.fullName,
+              parentPhone: parent.phone,
+            }))
+          );
 
-                    setStudents(allChildren);
-                } else {
-                    console.warn("Unexpected API format:", res);
-                }
-            } catch (error) {
-                console.error("Fetch student list error:", error);
-            }
-        };
-        fetchStudentList();
-    }, [student, studentDetail]);
-
-    const handleSelectStudent = (student) => {
-        setStudentsSelected((prev) => {
-            if (prev.includes(student)) {
-                return prev.filter((id) => id !== student._id);
-            }
-            return [...prev, student];
-        });
+          setStudents(allChildren);
+        } else {
+          console.warn("Unexpected API format:", res);
+        }
+      } catch (error) {
+        console.error("Fetch student list error:", error);
+      }
     };
+    fetchStudentList();
+  }, [student, studentDetail]);
 
-    // Nếu có tìm kiếm, chỉ hiển thị 1 học sinh
-    const displayStudents = student ? student : students;
+  const handleSelectStudent = (student) => {
+    setStudentsSelected((prev) => {
+      if (prev.includes(student)) {
+        return prev.filter((id) => id !== student._id);
+      }
+      return [...prev, student];
+    });
+  };
 
-    return (
-        <table className={cx("table")}>
-            <thead>
-                <tr>
-                    {showSelectCheck && <th>Select</th>}
-                    <th>Student ID</th>
-                    <th>Name</th>
-                    <th>Class</th>
-                    <th>Parent Phone</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                {displayStudents.map((item, index) => (
-                    <tr
-                        key={item._id || index}
-                        onClick={() =>
-                            setStudentDetail({
-                                _id: item._id,
-                                fullName: item.name,
-                                className: item.grade,
-                                status: item.status,
-                                parentName: item.parentName,
-                                parentPhone: item.parentPhone,
-                            })
-                        }
-                    >
-                        {showSelectCheck && (
-                            <td>
-                                <input
-                                    type="checkbox"
-                                    onChange={() => handleSelectStudent(item)}
-                                />
-                            </td>
-                        )}
-                        <td>{item._id || "N/A"}</td>
-                        <td>{item.name}</td>
-                        <td>{item.grade}</td>
-                        <td>{item.parentPhone}</td>
-                        <td>
-                            <span
-                                className={cx(
-                                    "status",
-                                    item.status === "Đang đi học"
-                                        ? "active"
-                                        : item.status === "Vắng mặt"
-                                        ? "leave"
-                                        : "inactive"
-                                )}
-                            >
-                                {item.status || "Chưa cập nhật"}
-                            </span>
-                        </td>
-                    </tr>
-                ))}
-            </tbody>
-        </table>
-    );
+  let displayStudents = [];
+
+  if (Array.isArray(studentPopUp) && studentPopUp.length > 0) {
+    displayStudents = studentPopUp;
+  } else if (Array.isArray(student) && student.length > 0) {
+    displayStudents = student;
+  } else {
+    displayStudents = students;
+  }
+
+  return (
+    <table className={cx("table")}>
+      <thead>
+        <tr>
+          {showSelectCheck && <th>Select</th>}
+          <th>Student Number</th>
+          <th>Name</th>
+          <th>Class</th>
+          <th>Parent Phone</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {displayStudents.map((item, index) => (
+          <tr
+            key={item._id || index}
+            onClick={() =>
+              studentDetail &&
+              setStudentDetail({
+                _id: item._id,
+                studentNumber: item.studentNumber,
+                fullName: item.name,
+                className: item.grade,
+                status: item.status,
+                parentName: item.parentName,
+                parentPhone: item.parentPhone,
+              })
+            }
+          >
+            {showSelectCheck && (
+              <td>
+                <input
+                  //   checked={}
+                  type="checkbox"
+                  onChange={() => handleSelectStudent(item)}
+                />
+              </td>
+            )}
+            <td>{item.studentNumber || "N/A"}</td>
+            <td>{item.name}</td>
+            <td>{item.grade}</td>
+            <td>{item.parentPhone}</td>
+            <td>
+              <span
+                className={cx(
+                  "status",
+                  item.status === "Đang đi học"
+                    ? "active"
+                    : item.status === "Vắng mặt"
+                      ? "leave"
+                      : "inactive"
+                )}
+              >
+                {item.status || "Chưa cập nhật"}
+              </span>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
 };
 
 export default StudentList;
