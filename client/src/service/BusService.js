@@ -33,6 +33,18 @@ export const getBusesByBusNumber = async (busNumber) => {
         throw error;
     }
 };
+export const getBusesByRouteNumber = async (routeNumber) => {
+    try {
+        const res = await axios.get(
+            "http://localhost:5000/api/bus/get-buses-by-route-number",
+            { params: { routeNumber } }
+        );
+        return res.data;
+    } catch (error) {
+        console.error("Get data error:", error);
+        throw error;
+    }
+};
 export const updateBus = async (data) => {
     try {
         const res = await axios.put(

@@ -176,3 +176,36 @@ export const getBusByBusNumber = async (req, res) => {
         });
     }
 };
+export const getBusByRouteNumber = async (req, res) => {
+    try {
+        const { routeNumber } = req.query;
+        if (!routeNumber) {
+            return res.json({
+                success: false,
+                message: "Route Number is required",
+            });
+        }
+
+        const data = await Bus.findOne({
+            routeNumber: { $regex: `^${routeNumber}$`, $options: "i" },
+        })
+            .populate("driver", "fullName phone role")
+            .populate("students.parent", "fullName phone role");
+
+        if (!data) {
+            return res.json({ success: false, message: "Bus not found" });
+        }
+
+        return res.json({
+            success: true,
+            message: "Get bus successfully",
+            data,
+        });
+    } catch (error) {
+        console.error(error);
+        return res.json({
+            success: false,
+            message: error.message,
+        });
+    }
+};

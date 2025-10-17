@@ -49,6 +49,16 @@ export const findDriverByDriverNumber = async (driverNumber) => {
         console.log(error);
     }
 };
+export const findDriverByStatus = async (status) => {
+    try {
+        const res = await axios.get(
+            `http://localhost:5000/api/user/find-driver-by-status/${status}`
+        );
+        return res.data;
+    } catch (error) {
+        console.log(error);
+    }
+};
 export const findStudentsByGrade = async (grade) => {
     try {
         const res = await axios.get(

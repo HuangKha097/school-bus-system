@@ -3,9 +3,14 @@ import classNames from "classnames/bind";
 import styles from "../assets/css/common/Filter.module.scss";
 
 const cx = classNames.bind(styles);
-const Filter = ({ firstTitle, secondTitle }) => {
-    const [ActiveFirstTitle, setActiveFirstTitle] = useState(false);
-    const [ActiveSecondTitle, setActiveSecondTitle] = useState(false);
+const Filter = ({
+    firstTitle,
+    secondTitle,
+    ActiveFirstTitle,
+    setActiveFirstTitle,
+    ActiveSecondTitle,
+    setActiveSecondTitle,
+}) => {
     return (
         <div className={cx("filter")}>
             {firstTitle && (

@@ -6,12 +6,15 @@ import BusDetail from "../manager/Bus/BusDetail";
 import Filter from "../Filter.jsx";
 
 import * as BusService from "../../service/BusService";
-
 const cx = classNames.bind(styles);
 
 const BusTab = () => {
-    const [busNumber, setBusNumber] = useState("");
+    const [ActiveFirstTitle, setActiveFirstTitle] = useState(false);
+    const [ActiveSecondTitle, setActiveSecondTitle] = useState(false);
+
+    const [valueSearch, setValueSearch] = useState("");
     const [bus, setBus] = useState(null);
+
     const [busDetail, setBusDetail] = useState({
         _id: "",
         driver: {},
@@ -25,14 +28,29 @@ const BusTab = () => {
     });
     console.log("busDetail :", busDetail);
 
-    const handleSearch = async () => {
-        if (!busNumber.trim()) {
+    const handleSearchByBusNumber = async () => {
+        if (!valueSearch.trim()) {
             setBus(null); // xoá search => quay về danh sách ban đầu
             return;
         }
         try {
-            const res = await BusService.getBusesByBusNumber(busNumber);
+            const res = await BusService.getBusesByBusNumber(valueSearch);
             setBus(res?.data || null);
+        } catch (error) {
+            console.error("Search bus error:", error);
+        }
+    };
+    const handleSearchByRouteNumber = async () => {
+        if (!valueSearch.trim()) {
+            setBus(null); // xoá search => quay về danh sách ban đầu
+            return;
+        }
+        try {
+            const res = await BusService.getBusesByRouteNumber(valueSearch);
+            setBus(res?.data || null);
+            console.log("====================================");
+            console.log(res?.data);
+            console.log("====================================");
         } catch (error) {
             console.error("Search bus error:", error);
         }
@@ -40,13 +58,15 @@ const BusTab = () => {
 
     const handleKeyDown = (e) => {
         if (e.key === "Enter") {
-            handleSearch();
+            ActiveSecondTitle
+                ? handleSearchByRouteNumber()
+                : handleSearchByBusNumber();
         }
     };
 
     const handleChange = (e) => {
         const value = e.target.value;
-        setBusNumber(value);
+        setValueSearch(value);
 
         if (!value.trim()) {
             setBus(null); // reset nếu input rỗng
@@ -58,20 +78,24 @@ const BusTab = () => {
             <div className={cx("left-block")}>
                 <label htmlFor="search" className={cx("search")}>
                     <input
-                        value={busNumber}
+                        value={valueSearch}
                         onChange={handleChange}
                         onKeyDown={handleKeyDown}
                         type="text"
                         name="search"
                         placeholder="Find bus"
                     />
-                </label>
-                <div className={cx("filter-wrapper")}>
+
                     <Filter
                         firstTitle={"By bus number"}
                         secondTitle={"By route"}
+                        ActiveFirstTitle={ActiveFirstTitle}
+                        setActiveFirstTitle={setActiveFirstTitle}
+                        ActiveSecondTitle={ActiveSecondTitle}
+                        setActiveSecondTitle={setActiveSecondTitle}
                     />
-                </div>
+                </label>
+                <div className={cx("filter-wrapper")}></div>
                 <div className={cx("bus-list")}>
                     <BusList
                         bus={bus}

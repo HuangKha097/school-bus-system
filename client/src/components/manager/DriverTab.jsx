@@ -9,6 +9,8 @@ import Filter from "../Filter.jsx";
 const cx = classNames.bind(styles);
 
 const DriverTab = () => {
+    const [ActiveFirstTitle, setActiveFirstTitle] = useState(false);
+
     const [searchValue, setSearchValue] = useState("");
     console.log(searchValue);
 
@@ -27,7 +29,7 @@ const DriverTab = () => {
 
     const handleKeyDown = (e) => {
         if (e.key === "Enter") {
-            getUserByUserNumber();
+            getUserData();
         }
     };
 
@@ -39,19 +41,22 @@ const DriverTab = () => {
         }
     };
 
-    const getUserByUserNumber = async () => {
+    const getUserData = async () => {
         try {
             if (!searchValue.trim()) {
                 setDriver(null); // clear => quay về list mặc định
                 return;
             }
-
-            const res = await UserService.findDriverByDriverNumber(searchValue);
-            console.log("res: ", res?.user);
+            let res;
+            ActiveFirstTitle
+                ? (res = await UserService.findDriverByStatus(searchValue))
+                : (res = await UserService.findDriverByDriverNumber(
+                      searchValue
+                  ));
+            console.log("res: ", res);
 
             if (res?.success && res?.user) {
                 setDriver(res?.user);
-                res?.user;
                 setDriverDetail({
                     _id: res?.user._id,
                     driverNumber: res?.user.driverInfo.driverNumber,
@@ -84,7 +89,11 @@ const DriverTab = () => {
                     />
                 </label>
                 <div className={cx("filter-wrapper")}>
-                    <Filter firstTitle={"By route"} secondTitle={"By status"} />
+                    <Filter
+                        firstTitle={"By status"}
+                        ActiveFirstTitle={ActiveFirstTitle}
+                        setActiveFirstTitle={setActiveFirstTitle}
+                    />
                 </div>
                 <div className={cx("bus-list")}>
                     <DriverList

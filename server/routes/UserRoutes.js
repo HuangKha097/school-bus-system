@@ -7,6 +7,7 @@ import {
     updateDriverInfo,
     findStudentsByGrade,
     updateParentInfo,
+    findDriverByStatus,
     // findStudentsByStudentNumber,
 } from "../controllers/UserController.js";
 
@@ -20,6 +21,7 @@ userRouter.get(
     "/find-driver-by-driver-number/:driverNumber",
     findDriverByDriverNumber
 );
+userRouter.get("/find-driver-by-status/:status", findDriverByStatus);
 userRouter.get("/find-students-by-grade/:grade", findStudentsByGrade);
 // userRouter.get(
 //   "/find-student-by-studentNumber/:studentNumber",
