@@ -4,7 +4,16 @@ import styles from "../../assets/css/manager/MessageTab.module.scss";
 
 const cx = classNames.bind(styles);
 
-// Dữ liệu giả lập để minh họa
+const API_KEY = import.meta.env.VITE_OPENROUTER_KEY;
+
+// --- OPENROUTER API URL ---
+const MODEL_URL = "https://openrouter.ai/api/v1/chat/completions";
+
+if (!API_KEY) {
+    console.error(" kiểm tra lại API Key ");
+}
+
+// data cứng để test api
 const mockRecipients = {
     parent: [
         { id: "p1", name: "Phụ huynh em Nguyễn Văn A" },
@@ -17,66 +26,8 @@ const mockRecipients = {
         { id: "d3", name: "Tài xế Đỗ Văn Dũng (BUS003)" },
     ],
 };
-
 const mockHistory = [
-    {
-        id: "h1",
-        to: "Tài xế Lý Văn Tín (BUS001)",
-        date: "2025-10-18 14:30",
-        message: "Học sinh Nguyễn Văn A đã xuống xe an toàn.",
-        type: "Học sinh xuống xe",
-    },
-    {
-        id: "h2",
-        to: "Tất cả phụ huynh",
-        date: "2025-10-18 08:15",
-        message:
-            "Do thời tiết xấu, xe buýt có thể đến trễ 10-15 phút. Mong quý vị thông cảm.",
-        type: "Thông báo chung",
-    },
-    {
-        id: "h3",
-        to: "Phụ huynh em Trần Thị B",
-        date: "2025-10-18 07:45",
-        message: "Em Trần Thị B đã lên xe.",
-        type: "Học sinh lên xe",
-    },
-
-    {
-        id: "h4",
-        to: "Tất cả Tài xế",
-        date: "2025-10-17 16:00",
-        message: "Nhắc nhở: Vui lòng kiểm tra và vệ sinh xe sau mỗi chuyến đi.",
-        type: "Thông báo chung",
-    },
-    {
-        id: "h5",
-        to: "Phụ huynh em Lê Văn C",
-        date: "2025-10-17 07:50",
-        message: "Em Lê Văn C đã lên xe.",
-        type: "Học sinh lên xe",
-    },
-    {
-        id: "h5",
-        to: "Phụ huynh em Lê Văn C",
-        date: "2025-10-17 07:50",
-        message: "Em Lê Văn C đã lên xe.",
-        type: "Học sinh lên xe",
-    },
-    {
-        id: "h5",
-        to: "Phụ huynh em Lê Văn C",
-        date: "2025-10-17 07:50",
-        message: "Em Lê Văn C đã lên xe.",
-        type: "Học sinh lên xe",
-    },
-    {
-        id: "h5",
-        to: "Phụ huynh em Lê Văn C",
-        date: "2025-10-17 07:50",
-        message: "Em Lê Văn C đã lên xe.",
-        type: "Học sinh lên xe",
-    },
+    // sau này thêm lịch sử chat vàp
 ];
 
 const MessageTab = () => {
@@ -85,6 +36,8 @@ const MessageTab = () => {
     const [targetRecipient, setTargetRecipient] = useState("");
     const [customMessage, setCustomMessage] = useState("");
     const [recipientList, setRecipientList] = useState([]);
+    const [isAiLoading, setIsAiLoading] = useState(false);
+    const [aiError, setAiError] = useState(null);
 
     useEffect(() => {
         if (targetRole === "parent") {
@@ -99,20 +52,124 @@ const MessageTab = () => {
 
     const handleSend = (e) => {
         e.preventDefault();
-        const messageData = {
+        console.log("Sending message:", {
             messageType,
             targetRole,
-            targetRecipient: targetRecipient || "all",
+            targetRecipient,
             customMessage,
-            sentAt: new Date().toISOString(),
-        };
-        console.log("Sending message:", messageData);
+        });
         alert("Tin nhắn đã được gửi (xem console)!");
+    };
 
-        setMessageType("");
-        setTargetRole("");
-        setCustomMessage("");
-        setTargetRecipient("");
+    const handleAiGenerate = async (e) => {
+        e.preventDefault();
+
+        if (!API_KEY) {
+            setAiError("Lỗi cấu hình: Không tìm thấy API Key.");
+            return;
+        }
+
+        setIsAiLoading(true);
+        setAiError(null);
+
+        const getSelectedText = (selectId) => {
+            const select = document.getElementById(selectId);
+            if (select && select.selectedIndex >= 0 && select.value !== "") {
+                // Check index and value
+                return select.options[select.selectedIndex].text.trim();
+            }
+            return "";
+        };
+
+        const messageTypeText = getSelectedText("messageType");
+        const targetRoleText = getSelectedText("targetRole");
+        const recipientText = getSelectedText("targetRecipient");
+
+        if (!messageType || !targetRole) {
+            setAiError("Vui lòng chọn Loại thông báo và Vai trò trước.");
+            setIsAiLoading(false);
+            return;
+        }
+
+        const targetDescription = recipientText || targetRoleText;
+
+        // Promp mặc đinh để gửi cho AI viết content
+        const systemPrompt = `Bạn là trợ lý ảo chuyên nghiệp của hệ thống trường học.
+Nhiệm vụ của bạn là soạn thảo tin nhắn thông báo lịch sự, trang trọng bằng tiếng Việt gửi đến phụ huynh hoặc tài xế.
+Nội dung tin nhắn phải có **ít nhất 15 từ**.
+Tuyệt đối chỉ trả về nội dung tin nhắn, không thêm bất kỳ lời chào, giải thích, hay ký tự đặc biệt nào (như [BOT] hay <s>).`;
+
+        const userPrompt = `Dựa vào thông tin sau:
+- Loại thông báo: "${messageTypeText}"
+- Người nhận: "${targetDescription}"
+Hãy viết nội dung tin nhắn.
+Lưu ý quan trọng: Nếu loại thông báo liên quan đến học sinh (ví dụ: "Học sinh... đã lên/xuống xe") VÀ người nhận là cụ thể (ví dụ: "Phụ huynh em Trần Thị B"), hãy tự động điền tên học sinh vào nội dung (ví dụ: "Em Trần Thị B đã lên xe an toàn.").`;
+
+        try {
+            const response = await fetch(MODEL_URL, {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${API_KEY}`,
+                    "Content-Type": "application/json",
+
+                    "HTTP-Referer": window.location.origin,
+                    "X-Title": "Do An Cong Nghe Phan Mem",
+                },
+                body: JSON.stringify({
+                    model: "mistralai/mistral-7b-instruct:free",
+                    messages: [
+                        { role: "system", content: systemPrompt },
+                        { role: "user", content: userPrompt },
+                    ],
+                    max_tokens: 150,
+                    temperature: 0.3,
+                }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response
+                    .json()
+                    .catch(() => response.text());
+                if (response.status === 401) {
+                    throw new Error(
+                        "Lỗi 401: API Key không hợp lệ hoặc đã bị xóa."
+                    );
+                }
+
+                const errorMessage =
+                    typeof errorData === "string"
+                        ? errorData
+                        : errorData?.error?.message ||
+                          `Lỗi ${response.status}: Lỗi không xác định từ API.`;
+                throw new Error(errorMessage);
+            }
+
+            const result = await response.json();
+            console.log("Toàn bộ kết quả từ OpenRouter:", result);
+
+            if (
+                result.choices &&
+                result.choices.length > 0 &&
+                result.choices[0].message
+            ) {
+                let generatedText = result.choices[0].message.content;
+
+                const cleanedText = generatedText
+                    .replace(/<s>|<\/s>|\[INST]|\[\/INST]|\[BOT]|\[\/BOT]/g, "")
+                    .trim();
+
+                setCustomMessage(cleanedText);
+            } else {
+                console.error(result);
+            }
+        } catch (err) {
+            console.error("Lỗi gọi AI:", err);
+            setAiError(
+                err.message || "Không thể tạo nội dung. Vui lòng thử lại."
+            );
+        } finally {
+            setIsAiLoading(false);
+        }
     };
 
     return (
@@ -198,7 +255,8 @@ const MessageTab = () => {
                             </select>
                         </div>
 
-                        {recipientList.length > 0 &&
+                        {recipientList &&
+                            recipientList.length > 0 &&
                             (targetRole === "parent" ||
                                 targetRole === "driver") && (
                                 <div className={cx("form-group")}>
@@ -211,7 +269,10 @@ const MessageTab = () => {
                                         onChange={(e) =>
                                             setTargetRecipient(e.target.value)
                                         }
-                                        required
+                                        required={
+                                            targetRole === "parent" ||
+                                            targetRole === "driver"
+                                        }
                                     >
                                         <option value="" disabled>
                                             Chọn người nhận cụ thể...
@@ -232,20 +293,39 @@ const MessageTab = () => {
                             <label htmlFor="customMessage">
                                 Nội dung tin nhắn
                             </label>
+
                             <button
+                                type="button"
                                 className={cx("ai-btn")}
-                                onClick={(e) => e.preventDefault()}
+                                onClick={handleAiGenerate}
+                                disabled={isAiLoading || !API_KEY}
                             >
-                                Nội dung tự động với AI
+                                {isAiLoading
+                                    ? "Đang tạo..."
+                                    : "Nội dung tự động với AI"}
                             </button>
+
+                            {aiError && (
+                                <span
+                                    style={{
+                                        color: "red",
+                                        fontSize: "1.3rem",
+                                        marginLeft: "1rem",
+                                    }}
+                                >
+                                    {aiError}
+                                </span>
+                            )}
+
                             <textarea
                                 id="customMessage"
                                 value={customMessage}
                                 onChange={(e) =>
                                     setCustomMessage(e.target.value)
                                 }
-                                placeholder="Nhập nội dung tin nhắn... (Nếu dùng mẫu, nội dung này sẽ được đính kèm)"
+                                placeholder="Nhập nội dung tin nhắn...  "
                                 rows={5}
+                                readOnly={isAiLoading}
                             />
                         </div>
 
