@@ -1,0 +1,175 @@
+/* Sử dụng lại cấu trúc .tab-wrapper, .left-block, .right-block
+  tương tự như BusTab.module.scss (được dùng trong StudentTab.jsx)
+*/
+.tab-wrapper {
+  display: flex;
+  gap: 2rem; // Khoảng cách giữa 2 cột
+  width: 100%;
+  max-height: 90vh;
+}
+
+/* ĐỒNG BỘ BỐ CỤC:
+  Left-block rộng hơn (chứa danh sách)
+  Right-block hẹp hơn (chứa chi tiết/biểu mẫu)
+*/
+.left-block {
+  flex: 2; // Rộng 2 phần (giống BusList)
+}
+
+.right-block {
+  flex: 1; // Hẹp 1 phần (giống BusDetail)
+}
+
+/* --- General Card Styling --- */
+/* .composer-wrapper và .history-wrapper là các card trắng bên trong 
+  mỗi block, tương tự như các card trong BusTab
+*/
+.composer-wrapper,
+.history-wrapper {
+  background-color: #ffffff;
+  padding: 2.5rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  height: 100%;
+  display: flex; /* Thêm flex-direction để quản lý thanh cuộn */
+  flex-direction: column;
+}
+
+h3 {
+  margin-top: 0;
+  margin-bottom: 2rem;
+  font-size: 2.4rem;
+  font-weight: 600;
+  color: #333;
+  flex-shrink: 0; /* Ngăn heading bị co lại */
+}
+
+/* --- Composer (Right Block) --- */
+.composer-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+
+  label {
+    display: block;
+    margin-bottom: 0.8rem;
+    font-weight: 600;
+    font-size: 1.6rem;
+    color: #555;
+  }
+
+  select,
+  textarea {
+    width: 100%;
+    padding: 1.4rem;
+    border: 1px solid #dcdcdc;
+    border-radius: 6px;
+    font-size: 1.6rem;
+    font-family: inherit;
+    background-color: #f9f9f9;
+    transition:
+      border-color 0.2s,
+      box-shadow 0.2s;
+
+    &:focus {
+      outline: none;
+      border-color: #007bff;
+      box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
+    }
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 140px;
+  }
+}
+
+.send-button {
+  padding: 1.4rem 2rem;
+  font-size: 1.6rem;
+  font-weight: bold;
+  color: #ffffff;
+  background-color: #007bff; // Màu xanh dương giống nút "Edit"
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-top: 0.5rem;
+
+  &:hover {
+    background-color: #0056b3;
+  }
+}
+
+/* --- History (Left Block) --- */
+.history-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  overflow-y: auto; // Cho phép cuộn
+  flex-grow: 1; /* Cho phép list chiếm không gian còn lại */
+  min-height: 0; // Cần thiết cho flex-grow và overflow
+
+  // Custom scrollbar
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 3px;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: #aaa;
+  }
+}
+
+.history-item {
+  padding: 2rem 1rem;
+  border-bottom: 1px solid #eeeeee;
+  font-size: 1.6rem;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.8rem;
+
+  strong {
+    color: #333;
+    font-size: 1.6rem;
+  }
+
+  .item-date {
+    font-size: 1.4rem;
+    color: #888;
+  }
+}
+
+.item-body {
+  .item-type {
+    font-weight: 600;
+    font-size: 1.6rem;
+    color: #007bff; // Màu xanh dương
+    margin-right: 0.8rem;
+  }
+
+  p {
+    display: inline; // Hiển thị nội dung ngay sau [Loại]
+    margin: 0;
+    color: #555;
+    line-height: 1.5;
+  }
+}

@@ -1,0 +1,167 @@
+/* Quy tắc áp dụng:
+  - 1rem = 10px (theo yêu cầu)
+  - 1.6rem = 16px (cho văn bản chính)
+*/
+
+.tab-wrapper {
+  display: flex;
+  gap: 2rem; // 20px
+  width: 100%;
+}
+
+.left-block {
+  flex: 2;
+}
+
+.right-block {
+  flex: 1;
+}
+
+/* --- General Card Styling --- */
+.composer-wrapper,
+.history-wrapper {
+  background-color: #ffffff;
+  padding: 25px; // "To lên" (tăng từ 1.5rem / 24px)
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+h3 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-size: 24px; // Giữ kích thước lớn cho tiêu đề
+  font-weight: 600;
+  color: #333;
+  flex-shrink: 0;
+}
+
+/* --- Composer (Right Block) --- */
+.composer-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group {
+  margin-bottom: 15px;
+
+  label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    font-size: 16px; // Áp dụng 1.6rem (16px)
+    color: #555;
+  }
+
+  select,
+  textarea {
+    width: 100%;
+    padding: 14px; // "To lên"
+    border: 1px solid #dcdcdc;
+    border-radius: 6px;
+    font-size: 16px; // Áp dụng 1.6rem (16px)
+    font-family: inherit;
+    background-color: #f9f9f9;
+    transition:
+      border-color 0.2s,
+      box-shadow 0.2s;
+
+    &:focus {
+      outline: none;
+      border-color: #007bff;
+      box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
+    }
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 140px; // "To lên"
+  }
+}
+
+.send-button {
+  padding: 14px 20px; // "To lên"
+  font-size: 16px; // Áp dụng 1.6rem (16px)
+  font-weight: bold;
+  color: #ffffff;
+  background-color: #007bff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-top: 5px;
+
+  &:hover {
+    background-color: #0056b3;
+  }
+}
+
+/* --- History (Left Block) --- */
+.history-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  overflow-y: auto;
+  flex-grow: 1;
+  min-height: 0;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 3px;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: #aaa;
+  }
+}
+
+.history-item {
+  padding: 20px 10px; // "To lên"
+  border-bottom: 1px solid #eeeeee;
+  font-size: 16px; // Áp dụng 1.6rem (16px) làm cơ sở
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+
+  strong {
+    color: #333;
+    font-size: 16px; // Kế thừa từ .history-item
+  }
+
+  .item-date {
+    font-size: 14px; // Nhỏ hơn 1 chút
+    color: #888;
+  }
+}
+
+.item-body {
+  .item-type {
+    font-weight: 600;
+    font-size: 16px; // Kế thừa từ .history-item
+    color: #007bff;
+    margin-right: 8px;
+  }
+
+  p {
+    display: inline;
+    margin: 0;
+    color: #555;
+    line-height: 1.5;
+  }
+}
