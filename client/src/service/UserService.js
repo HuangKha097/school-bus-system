@@ -69,6 +69,16 @@ export const findStudentsByGrade = async (grade) => {
         console.log(error);
     }
 };
+export const findStudentsByStudentNumber = async (studentNumber) => {
+    try {
+        const res = await axios.get(
+            `http://localhost:5000/api/user/find-student-by-studentNumber/${studentNumber}`
+        );
+        return res.data;
+    } catch (error) {
+        console.log(error);
+    }
+};
 export const updateStudent = async ({ parentPhone, parentInfo }) => {
     try {
         const res = await axios.put(
