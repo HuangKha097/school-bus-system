@@ -90,3 +90,39 @@ export const updateStudent = async ({ parentPhone, parentInfo }) => {
         console.log(error);
     }
 };
+export const sendMessage = async (messageData) => {
+    // messageData { userId, content, messageType }
+    try {
+        const res = await axios.post(
+            "http://localhost:5000/api/user/send-message",
+            messageData
+        );
+        return res.data;
+    } catch (error) {
+        console.error("Send message error:", error);
+        throw error;
+    }
+};
+export const sendMessageToRole = async (messageData) => {
+    try {
+        const res = await axios.post(
+            `http://localhost:5000/api/user/send-message-to-role`,
+            messageData
+        );
+        return res.data;
+    } catch (error) {
+        console.error("Send message to role error:", error);
+        throw error;
+    }
+};
+export const getMessageHistory = async (userId) => {
+    try {
+        const res = await axios.get(
+            `http://localhost:5000/api/user/get-history/${userId}`
+        );
+        return res.data;
+    } catch (error) {
+        console.error("Get message history error:", error);
+        throw error;
+    }
+};

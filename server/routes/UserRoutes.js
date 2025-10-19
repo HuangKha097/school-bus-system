@@ -9,7 +9,9 @@ import {
     updateParentInfo,
     findDriverByStatus,
     findStudentsByStudentNumber,
-    // findStudentsByStudentNumber,
+    sendMessageToSpecificUser,
+    getMessageHistory,
+    sendMessageToRole,
 } from "../controllers/UserController.js";
 
 const userRouter = express.Router();
@@ -28,6 +30,8 @@ userRouter.get(
     "/find-student-by-studentNumber/:studentNumber",
     findStudentsByStudentNumber
 );
-
 userRouter.put("/update-student/:parentPhone", updateParentInfo);
+userRouter.post("/send-message", sendMessageToSpecificUser);
+userRouter.get("/get-history/:userId", getMessageHistory);
+userRouter.post("/send-message-to-role", sendMessageToRole);
 export default userRouter;

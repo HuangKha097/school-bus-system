@@ -98,6 +98,30 @@ h3 {
     textarea {
         resize: vertical;
         min-height: 140px;
+
+        &.ai-loading {
+            border-width: 2px;
+            border-color: transparent;
+
+            background-image: linear-gradient(#f9f9f9, #f9f9f9),
+                conic-gradient(
+                    from var(--gradient-angle),
+                    #007bff,
+                    #00c6ff,
+                    #92fe9d,
+                    #00c6ff,
+                    #007bff
+                );
+
+            background-clip: padding-box, border-box;
+            background-origin: border-box;
+            animation: rotate-border 2.5s linear infinite;
+
+            &:focus {
+                box-shadow: none;
+                border-color: transparent;
+            }
+        }
     }
 }
 
@@ -184,5 +208,20 @@ h3 {
         margin: 0;
         color: #555;
         line-height: 1.5;
+    }
+}
+
+@property --gradient-angle {
+    syntax: "<angle>";
+    inherits: false;
+    initial-value: 0deg;
+}
+
+@keyframes rotate-border {
+    0% {
+        --gradient-angle: 0deg;
+    }
+    100% {
+        --gradient-angle: 360deg;
     }
 }

@@ -169,11 +169,10 @@ export const updateParentInfo = async (req, res) => {
     const { parentPhone } = req.params;
 
     try {
-        // tìm và cập nhật trực tiếp
         const user = await User.findOneAndUpdate(
             { phone: parentPhone, role: "parent" },
             { $set: { parentInfo } },
-            { new: true } // trả về document mới sau khi update
+            { new: true }
         );
 
         if (!user) {
@@ -369,5 +368,151 @@ export const findStudentsByStudentNumber = async (req, res) => {
             success: false,
             message: error.message,
         });
+    }
+};
+
+export const sendMessageToSpecificUser = async (req, res) => {
+    try {
+        const { userId, content, messageType, senderId } = req.body;
+
+        if (!userId) {
+            return res.json({
+                success: false,
+                message: "Không tìm thấy User ID (người nhận)",
+            });
+        }
+        if (!content) {
+            return res.json({
+                success: false,
+                message: "Nội dung tin nhắn là bắt buộc",
+            });
+        }
+        if (!senderId) {
+            return res.json({
+                success: false,
+                message: "Không xác định được người gửi (thiếu senderId)",
+            });
+        }
+
+        const newMessage = {
+            content: content,
+            messageType: messageType || "general",
+            sentBy: senderId,
+            sentAt: new Date(),
+        };
+
+        const updatedRecipient = await User.findOneAndUpdate(
+            { _id: userId }, // Tìm người nhận
+            { $push: { messageHistory: newMessage } }, // Thêm tin nhắn
+            { new: true }
+        );
+
+        if (!updatedRecipient) {
+            return res.json({
+                success: false,
+                message: "Không tìm thấy người nhận với ID này",
+            });
+        }
+
+        if (userId !== senderId) {
+            await User.updateOne(
+                { _id: senderId }, // Tìm người gửi
+                { $push: { messageHistory: newMessage } } // Thêm tin nhắn
+            );
+        }
+
+        return res.json({
+            success: true,
+            message: "Gửi tin nhắn thành công (đã lưu cho cả 2)",
+            result: updatedRecipient,
+        });
+    } catch (error) {
+        console.log(error);
+        return res.json({
+            success: false,
+            message: "Đã xảy ra lỗi server: " + error.message,
+        });
+    }
+};
+export const getMessageHistory = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        if (!userId) {
+            return res
+                .status(400)
+                .json({ success: false, message: "Thiếu User ID" });
+        }
+
+        const user = await User.findById(userId)
+            .select("messageHistory")
+            .populate({
+                path: "messageHistory.sentBy",
+                select: "fullName role",
+            });
+
+        if (!user) {
+            return res
+                .status(404)
+                .json({ success: false, message: "Không tìm thấy user" });
+        }
+
+        const sortedHistory = user.messageHistory.sort(
+            (a, b) => b.sentAt - a.sentAt
+        );
+
+        res.json({
+            success: true,
+            data: sortedHistory,
+        });
+    } catch (error) {
+        console.log("Lỗi khi lấy lịch sử tin nhắn:", error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+export const sendMessageToRole = async (req, res) => {
+    try {
+        const { role, content, messageType, senderId } = req.body;
+
+        if (!role || !["parent", "driver"].includes(role)) {
+            return res
+                .status(400)
+                .json({ success: false, message: "Vai trò không hợp lệ" });
+        }
+        if (!content) {
+            return res
+                .status(400)
+                .json({ success: false, message: "Nội dung là bắt buộc" });
+        }
+        if (!senderId) {
+            return res
+                .status(400)
+                .json({ success: false, message: "Thiếu ID người gửi" });
+        }
+
+        const newMessage = {
+            content: content,
+            messageType: messageType || "general_announcement",
+            sentBy: senderId,
+            sentAt: new Date(),
+        };
+
+        const updateResult = await User.updateMany(
+            { role: role },
+            { $push: { messageHistory: newMessage } }
+        );
+
+        await User.updateOne(
+            { _id: senderId },
+            { $push: { messageHistory: newMessage } }
+        );
+
+        res.json({
+            success: true,
+            message: `Gửi thông báo thành công cho ${updateResult.modifiedCount} người.`,
+            result: updateResult,
+        });
+    } catch (error) {
+        console.log("Lỗi khi gửi tin nhắn hàng loạt:", error);
+        res.status(500).json({ success: false, message: error.message });
     }
 };
