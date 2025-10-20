@@ -1,15 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import classNames from "classnames/bind";
 import styles from "../../assets/css/parent/DashboardTab.module.scss";
 import { Link } from "react-router-dom";
+import * as BusService from "../../service/BusService.js";
+import * as RouteService from "../../service/RouteService.js";
 
 const cx = classNames.bind(styles);
 
 const DashboardTab = ({ user }) => {
+    const [bus, setBus] = useState({});
+    const [routeCoords, setRouteCoords] = useState(null);
     const childrenList = user?.parentInfo?.children || [];
-    console.log("====================================");
-    console.log(childrenList);
-    console.log("====================================");
     const [selectedChildIndex, setSelectedChildIndex] = useState(0);
 
     const getStatusInfo = (status) => {
@@ -27,6 +28,42 @@ const DashboardTab = ({ user }) => {
         }
     };
 
+    useEffect(() => {
+        const fetchBus = async () => {
+            try {
+                const busId = childrenList[selectedChildIndex]?.registeredBus;
+                if (!busId) return;
+
+                const result = await BusService.getBusesByBusId(busId);
+                const busData = result?.data?.[0];
+                setBus(busData);
+
+                if (busData?.routeNumber) {
+                    try {
+                        const routeRes =
+                            await RouteService.getRouteByRouteNumber(
+                                busData.routeNumber
+                            );
+                        const routeData = routeRes?.data;
+                        if (routeData) {
+                            setRouteCoords({
+                                lat: routeData.latitude,
+                                lng: routeData.longitude,
+                            });
+                        } else {
+                            console.warn("Không tìm thấy tuyến cho parent");
+                        }
+                    } catch (error) {
+                        console.error("Lỗi khi lấy tọa độ tuyến:", error);
+                    }
+                }
+            } catch (error) {
+                console.log(error);
+            }
+        };
+        fetchBus();
+    }, [user, childrenList, selectedChildIndex]);
+
     if (childrenList.length === 0) {
         return (
             <div className={cx("dashboard-container")}>
@@ -37,9 +74,6 @@ const DashboardTab = ({ user }) => {
     }
 
     const selectedChild = childrenList[selectedChildIndex];
-    console.log("====================================");
-    console.log(selectedChild);
-    console.log("====================================");
     const statusInfo = getStatusInfo(selectedChild?.status);
 
     return (
@@ -80,7 +114,14 @@ const DashboardTab = ({ user }) => {
                         </div>
                     </div>
 
-                    <Link to={"/tracking"} className={cx("card-link")}>
+                    <Link
+                        to={`/tracking/${bus.busNumber}`}
+                        state={{ endAddress: routeCoords }}
+                        className={cx(
+                            "card-link",
+                            !bus.busNumber || !routeCoords ? "disabled" : ""
+                        )}
+                    >
                         <div className={cx("card", "action-card")}>
                             <span className={cx("action-icon")}>🗺️</span>
                             <h3>Theo dõi trên bản đồ</h3>
@@ -88,15 +129,12 @@ const DashboardTab = ({ user }) => {
                         </div>
                     </Link>
 
-                    {/* Các thẻ thông tin chi tiết */}
                     <div className={cx("info-grid")}>
                         <div className={cx("card", "info-card")}>
                             <p>Xe buýt đăng ký</p>
                             <h4>
                                 {selectedChild.registeredBus
-                                    ? `...${selectedChild.registeredBus.slice(
-                                          -8
-                                      )}`
+                                    ? bus?.busNumber
                                     : "N/A"}
                             </h4>
                         </div>

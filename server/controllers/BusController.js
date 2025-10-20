@@ -118,6 +118,30 @@ export const getAllBuses = async (req, res) => {
     }
 };
 
+export const getBusesById = async (req, res) => {
+    try {
+        const { busId } = req.query;
+        if (!busId) {
+            return res.json({ success: false, message: "busId is required" });
+        }
+
+        const data = await Bus.find({ _id: busId })
+            .populate("driver", "fullName phone role")
+            .populate("students.parent", "fullName phone role");
+
+        return res.json({
+            success: true,
+            message: "Get buses successfully",
+            data,
+        });
+    } catch (error) {
+        console.error(error);
+        return res.json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
 export const getBusesByStatus = async (req, res) => {
     try {
         const { status } = req.query;

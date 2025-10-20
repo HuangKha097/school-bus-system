@@ -72,9 +72,7 @@ const NavBar = ({ role, setRole, userName }) => {
                                 <Link to={"/dashboard"}>
                                     <li>Dashboard</li>
                                 </Link>
-                                <Link to={"/tracking"}>
-                                    <li>Live Tracking</li>
-                                </Link>
+
                                 <Link to={"/notifications"}>
                                     <li>Notifications</li>
                                 </Link>

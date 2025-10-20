@@ -7,7 +7,8 @@ import NotificationTab from "../components/parent/NotificationTab";
 import DashboardTab from "../components/parent/DashBoardTab";
 
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Tracking from "../components/Tracking";
+
+import ParentTrackingWrapper from "../components/parent/ParentTrackingWrapper";
 import * as UserService from "../service/UserService.js";
 
 const cx = classNames.bind(styles);
@@ -28,7 +29,7 @@ const ParentPage = ({ role, setRole, userName, userId }) => {
             }
         };
         fetchUser();
-    }, []);
+    }, [userId]);
 
     return (
         <div>
@@ -42,14 +43,17 @@ const ParentPage = ({ role, setRole, userName, userId }) => {
                         />
                     </div>
 
-                    {/* Nội dung hiển thị */}
                     <div className={cx("right-block")}>
                         <Routes>
                             <Route
                                 path="/dashboard"
                                 element={<DashboardTab user={user} />}
                             />
-                            <Route path="/tracking" element={<Tracking />} />
+
+                            <Route
+                                path="/tracking/:id"
+                                element={<ParentTrackingWrapper />}
+                            />
                             <Route
                                 path="/notifications"
                                 element={<NotificationTab user={user} />}

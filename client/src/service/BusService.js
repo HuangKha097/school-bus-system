@@ -21,6 +21,18 @@ export const getBusesByStatus = async (status) => {
         throw error;
     }
 };
+export const getBusesByBusId = async (busId) => {
+    try {
+        const res = await axios.get(
+            "http://localhost:5000/api/bus/get-buses-by-busId",
+            { params: { busId } }
+        );
+        return res.data;
+    } catch (error) {
+        console.error("Get data error:", error);
+        throw error;
+    }
+};
 export const getBusesByBusNumber = async (busNumber) => {
     try {
         const res = await axios.get(
