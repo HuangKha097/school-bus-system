@@ -15,6 +15,7 @@ const StudentList = ({
     studentPopUp,
 }) => {
     const [students, setStudents] = useState([]);
+    console.log(students);
 
     useEffect(() => {
         const fetchStudentList = async () => {
@@ -25,7 +26,7 @@ const StudentList = ({
                         (parent.parentInfo?.children || []).map((child) => ({
                             _id: child._id, // ID   làm key
                             childName: child.name,
-                            parentId: parent._id,
+                            parent: parent._id,
 
                             ...child,
                             name: child.name,
@@ -54,28 +55,19 @@ const StudentList = ({
         }
         return students;
     }, [studentPopUp, student, students]);
+    console.log("====================================");
+    console.log("display: ", displayStudents);
+    console.log("====================================");
 
-    //    xử lý chọn/bỏ chọn 1 học sinh
+    //  xử lý chọn/bỏ chọn 1 học sinh
     const handleSelectStudent = (student) => {
         setStudentsSelected((prev) => {
-            const isSelected = prev.some(
-                (s) =>
-                    s.parent === student.parentId &&
-                    s.childName === student.childName
-            );
+            const isSelected = prev.some((s) => s._id === student._id);
 
             if (isSelected) {
-                return prev.filter(
-                    (s) =>
-                        s.parent !== student.parentId ||
-                        s.childName !== student.childName
-                );
+                return prev.filter((s) => s._id !== student._id);
             } else {
-                const newStudentObject = {
-                    parent: student.parentId,
-                    childName: student.childName,
-                };
-                return [...prev, newStudentObject];
+                return [...prev, student];
             }
         });
     };
@@ -87,14 +79,9 @@ const StudentList = ({
                 return [];
             }
 
-            const allStudentObjects = displayStudents.map((s) => ({
-                parent: s.parentId,
-                childName: s.childName,
-            }));
-            return allStudentObjects;
+            return [...displayStudents];
         });
     };
-
     //  Tính toán xem "Select All" có được check không
     const isAllSelected =
         displayStudents.length > 0 &&
@@ -123,9 +110,7 @@ const StudentList = ({
             <tbody>
                 {displayStudents.map((item, index) => {
                     const isChecked = studentsSelected?.some(
-                        (s) =>
-                            s.parent === item.parentId &&
-                            s.childName === item.childName
+                        (s) => s._id === item._id
                     );
 
                     return (
@@ -141,6 +126,7 @@ const StudentList = ({
                                     status: item.status,
                                     parentName: item.parentName,
                                     parentPhone: item.parentPhone,
+                                    registeredBus: item.registeredBus,
                                 })
                             }
                         >

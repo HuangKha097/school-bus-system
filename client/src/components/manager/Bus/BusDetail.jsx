@@ -17,7 +17,9 @@ const BusDetail = ({ busDetail, setBusDetail }) => {
 
     //    [{ parent, childName }, ...]
     const [studentsSelected, setStudentsSelected] = useState([]);
-
+    console.log("====================================");
+    console.log(studentsSelected);
+    console.log("====================================");
     // ---------- Others state ----------
     const [drivers, setDriver] = useState([]);
     const [routes, setRoutes] = useState([]);
@@ -75,25 +77,94 @@ const BusDetail = ({ busDetail, setBusDetail }) => {
     const handleSave = async () => {
         try {
             const res = await BusService.updateBus(busUpdate);
-            if (res?.success) {
-                const driverId = busUpdate.driver;
-                if (driverId) {
-                    await UserService.updateDriverInfo(driverId, {
-                        assignedBus: busUpdate._id,
-                    });
-                }
-                setBusDetail(res.data);
-                setIsEditing(false);
-                toast.success("Cập nhật xe bus thành công ");
-            } else {
+            if (!res?.success) {
                 toast.error(res?.message || "Cập nhật thất bại");
+                return;
             }
+            setBusDetail(res.data);
+            setIsEditing(false);
+
+            // Cập nhật cho tài xế
+            const driverId = busUpdate.driver;
+            if (driverId) {
+                await UserService.updateDriverInfo(driverId, {
+                    assignedBus: busUpdate._id,
+                });
+            }
+
+            // PHỤ HUYNH
+            const allParentsRes = await UserService.getUserByRole("parent");
+            const allParentsData = allParentsRes?.data || [];
+
+            const studentsToUpdateByParent = {};
+            for (const student of studentsSelected) {
+                if (student.parentPhone) {
+                    if (!studentsToUpdateByParent[student.parentPhone]) {
+                        studentsToUpdateByParent[student.parentPhone] = [];
+                    }
+                    // Chỉ lưu studentNumber (hoặc _id) để dễ so sánh
+                    studentsToUpdateByParent[student.parentPhone].push(
+                        student.studentNumber
+                    );
+                }
+            }
+
+            const updatePromises = [];
+
+            for (const phone in studentsToUpdateByParent) {
+                const currentParent = allParentsData.find(
+                    (p) => p.phone === phone
+                );
+                if (
+                    !currentParent ||
+                    !currentParent.parentInfo ||
+                    !currentParent.parentInfo.children
+                ) {
+                    console.warn(`Không tìm thấy data cho phụ huynh: ${phone}`);
+                    continue;
+                }
+
+                // Lấy danh sách studentNumber cần cập nhật cho phụ huynh NÀY
+                const studentNumbersToUpdate = studentsToUpdateByParent[phone];
+
+                const updatedChildren = currentParent.parentInfo.children.map(
+                    (child) => {
+                        // Kiểm tra xem 'child' này có nằm trong danh sách cần update không
+                        if (
+                            studentNumbersToUpdate.includes(child.studentNumber)
+                        ) {
+                            return {
+                                ...child,
+                                registeredBus: busUpdate._id || null,
+                            };
+                        }
+
+                        return child;
+                    }
+                );
+
+                // them promise update vào mảng
+                updatePromises.push(
+                    UserService.updateStudent({
+                        parentPhone: phone,
+                        parentInfo: {
+                            ...currentParent.parentInfo, // Giữ data cũ của parent
+                            children: updatedChildren, // Thay bằng mảng children đã sửa
+                        },
+                    })
+                );
+            }
+
+            if (updatePromises.length > 0) {
+                await Promise.all(updatePromises);
+            }
+
+            toast.success("Cập nhật xe bus và thông tin học sinh thành công");
         } catch (error) {
             console.error(error);
-            toast.error("Có lỗi xảy ra khi cập nhật ");
+            toast.error("Có lỗi xảy ra khi cập nhật");
         }
     };
-
     //  Logic handleReset
     const handleReset = async () => {
         try {
@@ -142,6 +213,7 @@ const BusDetail = ({ busDetail, setBusDetail }) => {
     };
 
     // Logic findStudents
+
     const findStudents = async () => {
         try {
             if (!searchValue.trim()) {

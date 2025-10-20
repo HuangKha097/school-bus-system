@@ -22,9 +22,10 @@ const StudentTab = () => {
         status: "",
         parentName: "",
         parentPhone: "",
+        registeredBus: "",
     });
     console.log(searchValue);
-    console.log(student);
+    console.log(studentDetail);
 
     const handleKeyDown = (e) => {
         if (e.key === "Enter") {

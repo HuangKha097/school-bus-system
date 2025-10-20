@@ -9,7 +9,9 @@ import { Routes, Route, Navigate } from "react-router-dom";
 function App() {
     const [role, setRole] = useState("");
     const [userName, setUserName] = useState("");
+    const [userId, setUserId] = useState("");
     const [loading, setLoading] = useState(true); // trạng thái chờ
+
     const token = localStorage.getItem("token");
 
     useEffect(() => {
@@ -20,6 +22,7 @@ function App() {
 
                 setRole(decoded?.role);
                 setUserName(decoded?.userName);
+                setUserId(decoded?.userId);
             } catch (err) {
                 console.error("Token không hợp lệ:", err.message);
                 localStorage.removeItem("token");
@@ -73,6 +76,7 @@ function App() {
                                     role={role}
                                     setRole={setRole}
                                     userName={userName}
+                                    userId={userId}
                                 />
                             }
                         />

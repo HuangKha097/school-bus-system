@@ -56,6 +56,22 @@
             overflow-y: auto; // scroll dọc khi bảng quá cao
             max-height: 80vh; // giới hạn chiều cao (tùy chỉnh)
         }
+        & .back-btn {
+            padding: 1.4rem 2rem;
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: #ffffff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 0.5rem;
+
+            &:hover {
+                background-color: #0056b3;
+            }
+        }
     }
     & .right-block {
         flex: 4;

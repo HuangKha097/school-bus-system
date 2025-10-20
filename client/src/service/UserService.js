@@ -26,6 +26,19 @@ export const getUserByRole = async (role) => {
     }
 };
 
+export const getUserByUserId = async (userId) => {
+    try {
+        const res = await axios.get(
+            "http://localhost:5000/api/user/get-user-by-userId",
+            { params: { userId } }
+        );
+        return res.data;
+    } catch (error) {
+        console.error("Get users error:", error);
+        throw error;
+    }
+};
+
 export const updateDriverInfo = async (userId, driverUpdate) => {
     try {
         const res = await axios.put(

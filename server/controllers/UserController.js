@@ -63,6 +63,63 @@ export const signUp = async (req, res) => {
     }
 };
 
+export const bulkSignUp = async (req, res) => {
+    const usersArray = req.body;
+
+    if (!Array.isArray(usersArray) || usersArray.length === 0) {
+        return res.json({
+            success: false,
+            message: "Body must be an array of users",
+        });
+    }
+
+    try {
+        const createdUsers = [];
+        const errors = [];
+
+        for (const userData of usersArray) {
+            const { fullName, phone, password, role } = userData;
+
+            if (!fullName || !phone || !password || !role) {
+                errors.push(
+                    `Skipped user (missing required fields): ${
+                        fullName || phone
+                    }`
+                );
+                continue; // Bỏ qua user này
+            }
+
+            const checkUser = await User.findOne({ phone: userData.phone });
+            if (checkUser) {
+                errors.push(`Skipped user (already exists): ${phone}`);
+                continue;
+            }
+
+            // Bạn PHẢI hash mật khẩu cho từng user
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await bcrypt.hash(userData.password, salt);
+
+            const newUser = new User({
+                ...userData,
+                password: hashedPassword, // Ghi đè mật khẩu plain text
+            });
+
+            const savedUser = await newUser.save();
+            createdUsers.push(savedUser);
+        }
+
+        res.json({
+            success: true,
+            message: `Successfully created ${createdUsers.length} users.`,
+            created: createdUsers.length,
+            errors: errors,
+        });
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: error.message });
+    }
+};
+
 export const login = async (req, res) => {
     const { phone, password } = req.body;
     try {
@@ -106,6 +163,30 @@ export const login = async (req, res) => {
     } catch (error) {
         console.log(error);
         res.json({ success: false, message: error.message });
+    }
+};
+export const getUserById = async (req, res) => {
+    try {
+        const { userId } = req.query;
+        if (!userId) {
+            return res.json({
+                success: false,
+                message: "userId is required",
+            });
+        }
+
+        const users = await User.find({ _id: userId }).select("-password");
+        res.json({
+            success: true,
+            data: users,
+            message: "Get users by userId successfully",
+        });
+    } catch (error) {
+        console.error(error);
+        res.json({
+            success: false,
+            message: error.message,
+        });
     }
 };
 
@@ -289,6 +370,7 @@ export const findStudentsByGrade = async (req, res) => {
                     status: child.status,
                     parentName: parent.fullName,
                     parentPhone: parent.phone,
+                    registeredBus: child.registeredBus,
                 }))
         );
         console.log(students);
@@ -347,6 +429,7 @@ export const findStudentsByStudentNumber = async (req, res) => {
                     status: child.status,
                     parentName: parent.fullName,
                     parentPhone: parent.phone,
+                    registeredBus: child.registeredBus,
                 }))
         );
         console.log(students);
