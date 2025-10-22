@@ -38,6 +38,18 @@ export const getUserByUserId = async (userId) => {
         throw error;
     }
 };
+export const getStudentById = async (userId) => {
+    try {
+        const res = await axios.get(
+            "http://localhost:5000/api/user/get-student-by-userId",
+            { params: { userId } }
+        );
+        return res.data;
+    } catch (error) {
+        console.error("Get users error:", error);
+        throw error;
+    }
+};
 
 export const updateDriverInfo = async (userId, driverUpdate) => {
     try {

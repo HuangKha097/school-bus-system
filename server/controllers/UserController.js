@@ -189,6 +189,32 @@ export const getUserById = async (req, res) => {
         });
     }
 };
+export const getStudentById = async (req, res) => {
+    try {
+        const { userId } = req.query;
+        if (!userId) {
+            return res.json({
+                success: false,
+                message: "userId is required",
+            });
+        }
+
+        const users = await User.find({
+            "parentInfo.children._id": userId,
+        }).select("-password");
+        res.json({
+            success: true,
+            data: users,
+            message: "Get users by userId successfully",
+        });
+    } catch (error) {
+        console.error(error);
+        res.json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
 
 export const getUserByRole = async (req, res) => {
     try {

@@ -14,6 +14,7 @@ import {
     getMessageHistory,
     bulkSignUp,
     sendMessageToRole,
+    getStudentById,
 } from "../controllers/UserController.js";
 
 const userRouter = express.Router();
@@ -23,6 +24,7 @@ userRouter.post("/bulk-signup", bulkSignUp);
 userRouter.post("/login", login);
 userRouter.get("/get-user-by-role", getUserByRole);
 userRouter.get("/get-user-by-userId", getUserById);
+userRouter.get("/get-student-by-userId", getStudentById);
 userRouter.put("/update-driver/:userId", updateDriverInfo);
 userRouter.get(
     "/find-driver-by-driver-number/:driverNumber",

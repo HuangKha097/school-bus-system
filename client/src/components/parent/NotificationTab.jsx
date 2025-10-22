@@ -43,10 +43,6 @@ const NotificationTab = ({ user }) => {
     useEffect(() => {
         const rawHistory = user?.messageHistory || [];
 
-        console.log("====================================");
-        console.log("Dữ liệu thô từ prop:", rawHistory);
-        console.log("====================================");
-
         const formattedNotifications = rawHistory.map((item) => ({
             id: item._id,
             title: generateTitle(item.messageType),
