@@ -3,12 +3,7 @@ import classNames from "classnames/bind";
 import styles from "../assets/css/common/Page.module.scss";
 import NavBar from "../components/NavBar";
 import BusTab from "../components/manager/BusTab";
-import {
-    BrowserRouter as Router,
-    Routes,
-    Route,
-    useLocation,
-} from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import DriverTab from "../components/manager/DriverTab";
 import StudentTab from "../components/manager/StudentTab";
 import TrackingTab from "../components/manager/TrackingTab";

@@ -34,7 +34,7 @@ function App() {
         setLoading(false); // chỉ render route sau khi đã kiểm tra xong
     }, [token]);
 
-    if (loading) return null; // hoặc <LoadingSpinner />
+    if (loading) return null;
 
     return (
         <Routes>

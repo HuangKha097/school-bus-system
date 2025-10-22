@@ -247,8 +247,6 @@ export const updateDriverInfo = async (req, res) => {
     try {
         const { driverInfo } = req.body;
         const userId = req.params.userId;
-        console.log("Received driverInfo:", driverInfo);
-        console.log("userId:", req.params.userId);
 
         const user = await User.findById(userId);
 
@@ -259,7 +257,25 @@ export const updateDriverInfo = async (req, res) => {
             });
         }
 
-        user.driverInfo = { ...user.driverInfo, ...driverInfo };
+        //  Nếu có assignedBus
+        if (driverInfo?.assignedBus) {
+            const newBusId = driverInfo.assignedBus; // ID xe mới được gửi lên
+
+            if (!Array.isArray(user.driverInfo.assignedBus)) {
+                user.driverInfo.assignedBus = [];
+            }
+
+            if (
+                !user.driverInfo.assignedBus.some(
+                    (id) => id.toString() === newBusId.toString()
+                )
+            ) {
+                user.driverInfo.assignedBus.push(newBusId);
+            }
+        }
+
+        const { assignedBus, ...otherFields } = driverInfo || {};
+        user.driverInfo = { ...user.driverInfo, ...otherFields };
 
         await user.save();
 

@@ -86,12 +86,20 @@ const BusDetail = ({ busDetail, setBusDetail }) => {
 
             // Cập nhật cho tài xế
             const driverId = busUpdate.driver;
+
             if (driverId) {
+                const driver = await UserService.getUserByUserId(driverId);
+
+                const currentAssigned = driver.assignedBus || [];
+
+                const updatedAssigned = currentAssigned.includes(busUpdate._id)
+                    ? currentAssigned
+                    : [...currentAssigned, busUpdate._id];
+
                 await UserService.updateDriverInfo(driverId, {
-                    assignedBus: busUpdate._id,
+                    assignedBus: updatedAssigned,
                 });
             }
-
             // PHỤ HUYNH
             const allParentsRes = await UserService.getUserByRole("parent");
             const allParentsData = allParentsRes?.data || [];
@@ -102,7 +110,7 @@ const BusDetail = ({ busDetail, setBusDetail }) => {
                     if (!studentsToUpdateByParent[student.parentPhone]) {
                         studentsToUpdateByParent[student.parentPhone] = [];
                     }
-                    // Chỉ lưu studentNumber (hoặc _id) để dễ so sánh
+
                     studentsToUpdateByParent[student.parentPhone].push(
                         student.studentNumber
                     );
@@ -148,8 +156,8 @@ const BusDetail = ({ busDetail, setBusDetail }) => {
                     UserService.updateStudent({
                         parentPhone: phone,
                         parentInfo: {
-                            ...currentParent.parentInfo, // Giữ data cũ của parent
-                            children: updatedChildren, // Thay bằng mảng children đã sửa
+                            ...currentParent.parentInfo,
+                            children: updatedChildren,
                         },
                     })
                 );

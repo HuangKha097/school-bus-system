@@ -31,10 +31,7 @@ const userSchema = new mongoose.Schema({
         licenseNumber: { type: String },
         licenseClass: { type: String },
         licenseExpiry: { type: Date },
-        assignedBus: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "Bus",
-        },
+        assignedBus: [{ type: mongoose.Schema.Types.ObjectId, ref: "Bus" }],
         status: {
             type: String,
             enum: ["Đang hoạt động", "Nghỉ phép", "Tạm ngưng"],
