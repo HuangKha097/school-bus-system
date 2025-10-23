@@ -10,7 +10,7 @@ function App() {
     const [role, setRole] = useState("");
     const [userName, setUserName] = useState("");
     const [userId, setUserId] = useState("");
-    const [loading, setLoading] = useState(true); // trạng thái chờ
+    const [loading, setLoading] = useState(true); // trạng thái chờoo
 
     const token = localStorage.getItem("token");
 
