@@ -52,7 +52,11 @@ const DriverList = ({ setDriverDetail, driverDetail, driver }) => {
                                 phone: item?.phone,
                                 licenseNumber: item?.driverInfo?.licenseNumber,
                                 licenseClass: item?.driverInfo?.licenseClass,
-                                assignedBus: item?.driverInfo?.assignedBus,
+                                assignedBus:
+                                    item?.driverInfo?.assignedBus?.map(
+                                        (bus) => bus.busNumber
+                                    ) || [],
+
                                 status: item?.driverInfo?.status,
                             })
                         }

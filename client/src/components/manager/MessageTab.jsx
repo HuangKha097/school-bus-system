@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import classNames from "classnames/bind";
 import styles from "../../assets/css/manager/MessageTab.module.scss";
 import { jwtDecode } from "jwt-decode";
-
 import * as UserService from "../../service/UserService.js";
 
 const cx = classNames.bind(styles);
@@ -10,51 +9,41 @@ const cx = classNames.bind(styles);
 const API_KEY = import.meta.env.VITE_OPENROUTER_KEY;
 const MODEL_URL = "https://openrouter.ai/api/v1/chat/completions";
 
-if (!API_KEY) {
-    console.error(" kiểm tra lại API Key ");
-}
+if (!API_KEY) console.error("  Thiếu API Key cho OpenRouter");
 
 const MessageTab = () => {
     const token = localStorage.getItem("token");
-
     const [messageType, setMessageType] = useState("");
     const [targetRole, setTargetRole] = useState("");
     const [targetRecipient, setTargetRecipient] = useState("");
     const [customMessage, setCustomMessage] = useState("");
 
     const [recipientList, setRecipientList] = useState([]);
-
+    const [historyMessage, setHistoryMessage] = useState([]);
     const [isAiLoading, setIsAiLoading] = useState(false);
     const [isSending, setIsSending] = useState(false);
-
-    const [historyMessage, setHistoryMessage] = useState([]);
-    console.log(historyMessage);
-
     const [aiError, setAiError] = useState(null);
     const [sendError, setSendError] = useState(null);
 
+    //   Lấy lịch sử tin nhắn
     useEffect(() => {
         const fetchHistoryMessage = async () => {
             try {
-                const token = localStorage.getItem("token");
-                if (token) {
-                    const decodedToken = jwtDecode(token);
-                    const managerId = decodedToken.userId;
-                    if (managerId) {
-                        const res = await UserService.getMessageHistory(
-                            managerId
-                        );
-                        if (res.success) {
-                            setHistoryMessage(res.data);
-                        }
-                    }
+                if (!token) return;
+                const decodedToken = jwtDecode(token);
+                const managerId = decodedToken.userId;
+                if (managerId) {
+                    const res = await UserService.getMessageHistory(managerId);
+                    if (res.success) setHistoryMessage(res.data);
                 }
             } catch (error) {
                 console.error("Không thể tải lịch sử tin nhắn:", error);
             }
         };
         fetchHistoryMessage();
-    }, [historyMessage.length]);
+    }, []);
+
+    //  lấy danh sách người nhận
     useEffect(() => {
         const fetchRecipients = async () => {
             if (targetRole === "parent" || targetRole === "driver") {
@@ -62,119 +51,107 @@ const MessageTab = () => {
                     const res = await UserService.getUserByRole(targetRole);
                     setRecipientList(res?.data || []);
                 } catch (error) {
-                    console.log("Lỗi fetch user:", error);
+                    console.error("Lỗi lấy danh sách người dùng:", error);
                     setRecipientList([]);
                 }
             } else {
                 setRecipientList([]);
             }
         };
-
         fetchRecipients();
         setTargetRecipient("");
     }, [targetRole]);
 
+    //  Gửi tin nhắn
     const handleSend = async (e) => {
         e.preventDefault();
         setIsSending(true);
         setSendError(null);
 
+        if (!messageType || !targetRole || !customMessage.trim()) {
+            setSendError("  Vui lòng nhập đầy đủ thông tin trước khi gửi.");
+            setIsSending(false);
+            return;
+        }
+
         try {
             const decodedToken = jwtDecode(token);
             const senderId = decodedToken.userId;
-            if (!senderId)
-                throw new Error(
-                    "Token không hợp lệ, không tìm thấy ID người gửi."
-                );
 
             let res;
-            const isSendingToAll =
+            const isSendToAll =
                 targetRole === "all_parents" || targetRole === "all_drivers";
 
-            if (isSendingToAll) {
+            if (isSendToAll) {
                 const roleToSend =
                     targetRole === "all_parents" ? "parent" : "driver";
                 const messageData = {
                     role: roleToSend,
-                    content: customMessage,
-                    messageType: messageType,
-                    senderId: senderId,
+                    senderId,
+                    content: customMessage.trim(),
+                    messageType,
                 };
                 res = await UserService.sendMessageToRole(messageData);
             } else {
+                // Gửi 1 người cụ thể
                 const messageData = {
+                    senderId,
                     userId: targetRecipient,
-                    content: customMessage,
-                    messageType: messageType,
-                    senderId: senderId,
+                    content: customMessage.trim(),
+                    messageType,
                 };
                 res = await UserService.sendMessage(messageData);
             }
 
             if (res?.success) {
-                alert(res.message || "Tin nhắn đã được gửi thành công!");
-
-                // Reset form
+                alert(res.message || "Tin nhắn đã được gửi!");
                 setCustomMessage("");
                 setMessageType("");
-                setTargetRecipient("");
                 setTargetRole("");
+                setTargetRecipient("");
+                const updatedHistory = await UserService.getMessageHistory(
+                    senderId
+                );
+                if (updatedHistory.success)
+                    setHistoryMessage(updatedHistory.data);
             } else {
-                setSendError(res.message || "Có lỗi xảy ra khi gửi.");
+                setSendError(res.message || "Lỗi khi gửi tin nhắn.");
             }
         } catch (error) {
-            console.error("Lỗi gửi tin nhắn:", error);
-            setSendError(
-                error.response?.data?.message ||
-                    error.message ||
-                    "Không thể kết nối đến server."
-            );
+            console.error("Gửi tin nhắn thất bại:", error);
+            setSendError(error.message || "Không thể gửi tin nhắn.");
         } finally {
             setIsSending(false);
         }
     };
 
+    //  AI tạo nội dung gợi ý
     const handleAiGenerate = async (e) => {
         e.preventDefault();
-
         if (!API_KEY) {
-            setAiError("Lỗi cấu hình: Không tìm thấy API Key.");
+            setAiError("Thiếu API Key cho OpenRouter.");
             return;
         }
 
         setIsAiLoading(true);
         setAiError(null);
 
-        const getSelectedText = (selectId) => {
-            const select = document.getElementById(selectId);
-            if (select && select.selectedIndex >= 0 && select.value !== "") {
-                return select.options[select.selectedIndex].text.trim();
-            }
-            return "";
-        };
-
-        const messageTypeText = getSelectedText("messageType");
-        const targetRoleText = getSelectedText("targetRole");
-        const recipientText = getSelectedText("targetRecipient");
-
-        if (!messageType || !targetRole) {
-            setAiError("Vui lòng chọn Loại thông báo và Vai trò trước.");
-            setIsAiLoading(false);
-            return;
-        }
-
+        const messageTypeText =
+            document.getElementById("messageType")?.selectedOptions[0]?.text;
+        const targetRoleText =
+            document.getElementById("targetRole")?.selectedOptions[0]?.text;
+        const recipientText =
+            document.getElementById("targetRecipient")?.selectedOptions[0]
+                ?.text;
         const targetDescription = recipientText || targetRoleText;
 
-        const systemPrompt = `Bạn là trợ lý ảo chuyên nghiệp của hệ thống trường học.
-Nhiệm vụ của bạn là soạn thảo tin nhắn thông báo lịch sự, trang trọng bằng tiếng Việt gửi đến phụ huynh hoặc tài xế.
-Nội dung tin nhắn phải có **ít nhất 15 từ**.
-Tuyệt đối chỉ trả về nội dung tin nhắn, không thêm bất kỳ lời chào, giải thích, hay ký tự đặc biệt nào (như [BOT] hay <s>).`;
+        const systemPrompt = `Bạn là trợ lý ảo của hệ thống trường học.
+Soạn tin nhắn thông báo ngắn gọn, trang trọng bằng tiếng Việt.
+Không thêm lời chào, dấu đặc biệt hoặc ký hiệu.`;
 
-        const userPrompt = `Dựa vào thông tin sau:
-- Loại thông báo: "${messageTypeText}"
-- Người nhận: "${targetDescription}"
-Hãy viết nội dung tin nhắn.
-Lưu ý quan trọng: Nếu loại thông báo liên quan đến học sinh (ví dụ: "Học sinh... đã lên/xuống xe") VÀ người nhận là cụ thể (ví dụ: "Phụ huynh em Trần Thị B"), hãy tự động điền tên học sinh vào nội dung (ví dụ: "Em Trần Thị B đã lên xe an toàn.").`;
+        const userPrompt = `Loại thông báo: "${messageTypeText}"
+Người nhận: "${targetDescription}"
+Hãy viết nội dung tin nhắn tối thiểu 15 từ, rõ ràng và lịch sự.`;
 
         try {
             const response = await fetch(MODEL_URL, {
@@ -183,7 +160,6 @@ Lưu ý quan trọng: Nếu loại thông báo liên quan đến học sinh (ví
                     Authorization: `Bearer ${API_KEY}`,
                     "Content-Type": "application/json",
                     "HTTP-Referer": window.location.origin,
-                    "X-Title": "Do An Cong Nghe Phan Mem",
                 },
                 body: JSON.stringify({
                     model: "mistralai/mistral-7b-instruct:free",
@@ -196,43 +172,14 @@ Lưu ý quan trọng: Nếu loại thông báo liên quan đến học sinh (ví
                 }),
             });
 
-            if (!response.ok) {
-                const errorData = await response
-                    .json()
-                    .catch(() => response.text());
-                if (response.status === 401) {
-                    throw new Error(
-                        "Lỗi 401: API Key không hợp lệ hoặc đã bị xóa."
-                    );
-                }
-                const errorMessage =
-                    typeof errorData === "string"
-                        ? errorData
-                        : errorData?.error?.message ||
-                          `Lỗi ${response.status}: Lỗi không xác định từ API.`;
-                throw new Error(errorMessage);
-            }
-
             const result = await response.json();
-
-            if (
-                result.choices &&
-                result.choices.length > 0 &&
-                result.choices[0].message
-            ) {
-                let generatedText = result.choices[0].message.content;
-                const cleanedText = generatedText
-                    .replace(/<s>|<\/s>|\[INST]|\[\/INST]|\[BOT]|\[\/BOT]/g, "")
-                    .trim();
-                setCustomMessage(cleanedText);
-            } else {
-                console.error(result);
-            }
-        } catch (err) {
-            console.error("Lỗi gọi AI:", err);
-            setAiError(
-                err.message || "Không thể tạo nội dung. Vui lòng thử lại."
+            const generatedText = result?.choices?.[0]?.message?.content || "";
+            setCustomMessage(
+                generatedText.replace(/<s>|<\/s>|\[.*?\]/g, "").trim()
             );
+        } catch (err) {
+            console.error("Lỗi AI:", err);
+            setAiError("Không thể tạo nội dung tự động.");
         } finally {
             setIsAiLoading(false);
         }
@@ -249,28 +196,18 @@ Lưu ý quan trọng: Nếu loại thông báo liên quan đến học sinh (ví
                                 Chưa có lịch sử tin nhắn.
                             </li>
                         ) : (
-                            historyMessage.map((item) => (
-                                <li
-                                    key={item._id}
-                                    className={cx("history-item")}
-                                >
+                            historyMessage.map((item, idx) => (
+                                <li key={idx} className={cx("history-item")}>
                                     <div className={cx("item-header")}>
-                                        <strong>
-                                            Đến:
-                                            {item
-                                                ? item._id
-                                                : item.recipientRole ||
-                                                  "Không rõ"}
-                                        </strong>
+                                        <strong>[{item.messageType}]</strong>
                                         <span className={cx("item-date")}>
-                                            {item.sentAt}
+                                            {new Date(
+                                                item.sentAt
+                                            ).toLocaleString("vi-VN")}
                                         </span>
                                     </div>
                                     <div className={cx("item-body")}>
-                                        <span className={cx("item-type")}>
-                                            [{item.messageType}]
-                                        </span>
-                                        <p>{item.content}</p>
+                                        {item.content}
                                     </div>
                                 </li>
                             ))
@@ -291,20 +228,20 @@ Lưu ý quan trọng: Nếu loại thông báo liên quan đến học sinh (ví
                                 onChange={(e) => setMessageType(e.target.value)}
                                 required
                             >
-                                <option value="" disabled>
-                                    Chọn mẫu thông báo...
+                                <option value="">
+                                    -- Chọn loại thông báo --
                                 </option>
                                 <option value="student_on_bus">
-                                    Học sinh... đã lên xe
+                                    Học sinh đã lên xe
                                 </option>
                                 <option value="student_off_bus">
-                                    Học sinh... đã xuống xe
+                                    Học sinh đã xuống xe
                                 </option>
                                 <option value="bus_delayed">
-                                    Xe buýt... bị trễ
+                                    Xe buýt bị trễ
                                 </option>
                                 <option value="bus_arrived">
-                                    Xe buýt... đã đến điểm
+                                    Xe buýt đã đến
                                 </option>
                                 <option value="general_announcement">
                                     Thông báo chung
@@ -313,33 +250,27 @@ Lưu ý quan trọng: Nếu loại thông báo liên quan đến học sinh (ví
                         </div>
 
                         <div className={cx("form-group")}>
-                            <label htmlFor="targetRole">
-                                Gửi đến (Vai trò)
-                            </label>
+                            <label htmlFor="targetRole">Gửi đến</label>
                             <select
                                 id="targetRole"
                                 value={targetRole}
                                 onChange={(e) => setTargetRole(e.target.value)}
                                 required
                             >
-                                <option value="" disabled>
-                                    Chọn vai trò...
-                                </option>
+                                <option value="">-- Chọn đối tượng --</option>
                                 <option value="parent">Phụ huynh</option>
                                 <option value="driver">Tài xế</option>
                                 <option value="all_parents">
-                                    Tất cả Phụ huynh
+                                    Tất cả phụ huynh
                                 </option>
                                 <option value="all_drivers">
-                                    Tất cả Tài xế
+                                    Tất cả tài xế
                                 </option>
                             </select>
                         </div>
 
-                        {recipientList &&
-                            recipientList.length > 0 &&
-                            (targetRole === "parent" ||
-                                targetRole === "driver") && (
+                        {(targetRole === "parent" || targetRole === "driver") &&
+                            recipientList.length > 0 && (
                                 <div className={cx("form-group")}>
                                     <label htmlFor="targetRecipient">
                                         Người nhận cụ thể
@@ -352,37 +283,29 @@ Lưu ý quan trọng: Nếu loại thông báo liên quan đến học sinh (ví
                                         }
                                         required
                                     >
-                                        <option value="" disabled>
-                                            Chọn người nhận cụ thể...
+                                        <option value="">
+                                            -- Chọn người nhận --
                                         </option>
-
-                                        {recipientList.map((recipient) => {
-                                            let label = recipient.fullName;
-
+                                        {recipientList.map((r) => {
+                                            let label = r.fullName;
                                             if (
-                                                recipient.role === "parent" &&
-                                                recipient.parentInfo?.children
-                                                    ?.length > 0
-                                            ) {
-                                                const childrenNames =
-                                                    recipient.parentInfo.children
-                                                        .map((c) => c.name)
-                                                        .join(", ");
-                                                label += ` (Phụ huynh em: ${childrenNames})`;
-                                            } else if (
-                                                recipient.role === "driver" &&
-                                                recipient.driverInfo
-                                                    ?.driverNumber
-                                            ) {
-                                                label += ` (${recipient.driverInfo.driverNumber})`;
-                                            }
-
+                                                r.role === "parent" &&
+                                                r.parentInfo?.children?.length
+                                            )
+                                                label += ` (Phụ huynh em ${r.parentInfo.children
+                                                    .map((c) => c.name)
+                                                    .join(", ")})`;
+                                            if (
+                                                r.role === "driver" &&
+                                                r.driverInfo?.driverNumber
+                                            )
+                                                label += ` (Mã TX: ${r.driverInfo.driverNumber})`;
                                             return (
                                                 <option
-                                                    key={recipient._id}
-                                                    value={recipient._id}
+                                                    key={r._id}
+                                                    value={r._id}
                                                 >
-                                                    {label}{" "}
+                                                    {label}
                                                 </option>
                                             );
                                         })}
@@ -391,46 +314,35 @@ Lưu ý quan trọng: Nếu loại thông báo liên quan đến học sinh (ví
                             )}
 
                         <div className={cx("form-group")}>
-                            <label htmlFor="customMessage">
-                                Nội dung tin nhắn
-                            </label>
-
+                            <label>Nội dung tin nhắn</label>
                             <button
                                 type="button"
                                 className={cx("ai-btn")}
                                 onClick={handleAiGenerate}
-                                disabled={isAiLoading || !API_KEY || isSending}
+                                disabled={isAiLoading || !API_KEY}
                             >
                                 {isAiLoading
                                     ? "Đang tạo..."
-                                    : "Nội dung tự động với AI"}
+                                    : "Tạo nội dung tự động (AI)"}
                             </button>
-
                             {aiError && (
                                 <span className={cx("error-text")}>
                                     {aiError}
                                 </span>
                             )}
-
                             <textarea
-                                id="customMessage"
                                 value={customMessage}
                                 onChange={(e) =>
                                     setCustomMessage(e.target.value)
                                 }
-                                className={cx({ "ai-loading": isAiLoading })}
-                                placeholder="Nhập nội dung tin nhắn...  "
+                                placeholder="Nhập nội dung tin nhắn hoặc dùng AI để gợi ý..."
                                 rows={5}
-                                readOnly={isAiLoading || isSending}
                                 required
                             />
                         </div>
 
                         {sendError && (
-                            <span
-                                className={cx("error-text")}
-                                style={{ marginBottom: "1rem" }}
-                            >
+                            <span className={cx("error-text")}>
                                 {sendError}
                             </span>
                         )}

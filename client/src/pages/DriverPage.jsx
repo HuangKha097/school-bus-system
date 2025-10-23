@@ -17,7 +17,7 @@ const cx = classNames.bind(styles);
 
 const DriverPage = ({ role, setRole, userName, userId }) => {
     const [buses, setBuses] = useState([]);
-    const [route, setRoute] = useState(null);
+    const [routes, setRoutes] = useState({});
     const [user, setUser] = useState(null);
     const [students, setStudents] = useState([]);
 
@@ -25,11 +25,10 @@ const DriverPage = ({ role, setRole, userName, userId }) => {
     useEffect(() => {
         const fetchUser = async () => {
             try {
-                const result = await UserService.getUserByUserId(userId);
+                const result = await UserService.getUserById(userId);
                 const userData = Array.isArray(result?.data)
                     ? result.data[0]
                     : result.data;
-                console.log(">>> USER:", userData);
                 setUser(userData);
             } catch (err) {
                 console.error("Error fetching user:", err);
@@ -38,19 +37,21 @@ const DriverPage = ({ role, setRole, userName, userId }) => {
         fetchUser();
     }, [userId]);
 
-    //   Lấy bus của tài xế
+    //  Lấy danh sách bus của tài xế
     useEffect(() => {
         const fetchBus = async () => {
             if (!user?.driverInfo?.assignedBus?.length) return;
             try {
-                const busIds = user.driverInfo.assignedBus;
+                const busRefs = user.driverInfo.assignedBus;
                 const results = await Promise.all(
-                    busIds.map((id) => BusService.getBusesByBusId(id))
+                    busRefs.map((busRef) =>
+                        BusService.getBusesByBusId(busRef.busId)
+                    )
                 );
+
                 const fetchedBuses = results.map((res) =>
                     Array.isArray(res.data) ? res.data[0] : res.data
                 );
-                console.log(">>> BUSES:", fetchedBuses);
                 setBuses(fetchedBuses);
             } catch (err) {
                 console.error("Error fetching buses:", err);
@@ -59,52 +60,74 @@ const DriverPage = ({ role, setRole, userName, userId }) => {
         fetchBus();
     }, [user]);
 
-    //   Lấy route
+    //   Lấy route cho từng bus
     useEffect(() => {
-        const fetchRoute = async () => {
+        const fetchRoutes = async () => {
             if (!buses?.length) return;
-            const routeNumber = buses[0]?.routeNumber;
-            if (!routeNumber) return;
-            try {
-                const result = await RouteService.getRouteByRouteNumber(
-                    routeNumber
-                );
-                const routeData = Array.isArray(result?.data)
-                    ? result.data[0]
-                    : result.data;
-                console.log(">>> ROUTE DATA:", routeData);
-                setRoute(routeData);
-            } catch (err) {
-                console.error("Error fetching route:", err);
+
+            const routeMap = {};
+
+            for (const bus of buses) {
+                if (!bus.routeNumber) continue;
+                try {
+                    const result = await RouteService.getRouteByRouteNumber(
+                        bus.routeNumber
+                    );
+                    const routeData = Array.isArray(result?.data)
+                        ? result.data[0]
+                        : result.data;
+                    routeMap[bus.routeNumber] = routeData;
+                } catch (err) {
+                    console.error(
+                        `Error fetching route for ${bus.routeNumber}:`,
+                        err
+                    );
+                }
             }
+
+            setRoutes(routeMap);
         };
-        fetchRoute();
+
+        fetchRoutes();
     }, [buses]);
 
-    //  Lấy danh sách học sinh
+    //  Lấy danh sách học sinh cho bus đang chạy
     useEffect(() => {
         const fetchStudents = async () => {
-            if (!buses?.[0]?.students?.length) {
+            const activeBus = buses.find((b) => b.busStatus === "Đang chạy");
+            if (!activeBus?.students?.length) {
                 setStudents([]);
                 return;
             }
 
             try {
-                const studentsIdList = buses[0].students;
+                const studentIds = activeBus.students;
+                const resParents = await UserService.getUserByRole("parent");
+                const parents = resParents?.data || [];
 
-                const studentPromises = studentsIdList.map(async (student) => {
-                    const res = await UserService.getStudentById(student._id);
-                    const parent = res?.data?.[0];
-                    const foundStudent = parent?.parentInfo?.children?.find(
-                        (child) => child._id === student._id
-                    );
-                    return foundStudent || null;
-                });
+                const studentData = studentIds
+                    .map((student) => {
+                        const parent = parents.find((p) =>
+                            p.parentInfo?.children?.some(
+                                (child) =>
+                                    String(child._id) === String(student._id)
+                            )
+                        );
+                        if (!parent) return null;
 
-                const studentData = (await Promise.all(studentPromises)).filter(
-                    Boolean
-                );
-                console.log(">>> STUDENTS:", studentData);
+                        const foundStudent = parent.parentInfo.children.find(
+                            (child) => String(child._id) === String(student._id)
+                        );
+
+                        return {
+                            ...foundStudent,
+                            parentName: parent.fullName,
+                            parentPhone: parent.phone,
+                            parentId: parent._id,
+                        };
+                    })
+                    .filter(Boolean);
+
                 setStudents(studentData);
             } catch (error) {
                 console.error("Error fetching students:", error);
@@ -126,11 +149,7 @@ const DriverPage = ({ role, setRole, userName, userId }) => {
                         <Route
                             path="/myschedule"
                             element={
-                                <MyScheduleTab
-                                    buses={buses}
-                                    route={route}
-                                    user={user}
-                                />
+                                <MyScheduleTab buses={buses} routes={routes} />
                             }
                         />
 
@@ -152,10 +171,19 @@ const DriverPage = ({ role, setRole, userName, userId }) => {
                         <Route
                             path="/students-list"
                             element={
-                                route ? (
+                                Object.keys(routes).length ? (
                                     <StudentListTab
                                         students={students}
-                                        route={route}
+                                        route={
+                                            routes[
+                                                buses.find(
+                                                    (b) =>
+                                                        b.busStatus ===
+                                                        "Đang chạy"
+                                                )?.routeNumber
+                                            ]
+                                        } //  lấy route tương ứng bus đang chạy
+                                        buses={buses}
                                     />
                                 ) : (
                                     <div className={cx("loading-text")}>

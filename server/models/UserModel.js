@@ -1,66 +1,91 @@
 import mongoose from "mongoose";
 
-const userSchema = new mongoose.Schema({
-  fullName: { type: String, required: true },
-  email: { type: String },
-  password: { type: String, required: true },
-  role: {
-    type: String,
-    enum: ["manager", "parent", "driver"],
-    required: true,
-  },
-  phone: { type: String },
-  createdAt: { type: Date, default: Date.now },
-
-  // --- Nếu là tài xế ---
-  driverInfo: {
-    driverNumber: { type: String, unique: false, sparse: true },
-    licenseNumber: { type: String },
-    licenseClass: { type: String },
-    licenseExpiry: { type: Date },
-    assignedBus: [
-      {
-        busId: { type: mongoose.Schema.Types.ObjectId, ref: "Bus" },
-        busNumber: { type: String },
-        busStatus: { type: String, enum: ["Đang chạy", "Bảo trì", "Dừng"] },
-      },
-    ],
-    status: {
-      type: String,
-      enum: ["Đang hoạt động", "Nghỉ phép", "Tạm ngưng"],
-      default: "Đang hoạt động",
+const messageSchema = new mongoose.Schema({
+    senderRole: {
+        type: String,
+        enum: ["driver", "manager", "system"],
+        required: true,
     },
-  },
+    content: { type: String, required: true },
+    timestamp: { type: Date, default: Date.now },
+});
 
-  // --- Nếu là phụ huynh ---
-  parentInfo: {
-    children: [
-      {
-        studentNumber: { type: String },
-        name: { type: String, required: true },
-        age: { type: Number },
-        gender: { type: String, enum: ["Nam", "Nữ"] },
-        grade: { type: String }, // lớp
-        phone: { type: String }, // số điện thoại riêng của học sinh (nếu có)
+const userSchema = new mongoose.Schema({
+    fullName: { type: String, required: true },
+    email: { type: String },
+    password: { type: String, required: true },
+    role: {
+        type: String,
+        enum: ["manager", "parent", "driver"],
+        required: true,
+    },
+    phone: { type: String },
+    createdAt: { type: Date, default: Date.now },
 
-        registeredBus: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "Bus",
+    messageHistory: [
+        {
+            senderId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+            senderName: String,
+            senderRole: String,
+            recipientId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+            recipientName: String,
+            recipientRole: String,
+            content: String,
+            messageType: String,
+            sentAt: { type: Date, default: Date.now },
         },
-        status: {
-          type: String,
-          enum: ["Đang đi học", "Vắng mặt", "Ngừng tham gia"],
-          default: "Đang đi học",
-        },
-      },
     ],
-  },
+
+    driverInfo: {
+        driverNumber: { type: String },
+        licenseNumber: { type: String },
+        licenseClass: { type: String },
+        licenseExpiry: { type: Date },
+        assignedBus: [
+            {
+                busId: { type: mongoose.Schema.Types.ObjectId, ref: "Bus" },
+                busNumber: { type: String },
+                busStatus: {
+                    type: String,
+                    enum: ["Đang chạy", "Bảo trì", "Dừng"],
+                },
+                students: { type: Array, default: [] },
+            },
+        ],
+        status: {
+            type: String,
+            enum: ["Đang hoạt động", "Nghỉ phép", "Tạm ngưng"],
+            default: "Đang hoạt động",
+        },
+    },
+
+    parentInfo: {
+        children: [
+            {
+                studentNumber: { type: String },
+                name: { type: String },
+                age: { type: Number },
+                gender: { type: String, enum: ["Nam", "Nữ"] },
+                grade: { type: String },
+                phone: { type: String },
+                registeredBus: {
+                    type: mongoose.Schema.Types.ObjectId,
+                    ref: "Bus",
+                },
+                status: {
+                    type: String,
+                    enum: ["Đang đi học", "Vắng mặt", "Ngừng tham gia"],
+                    default: "Đang đi học",
+                },
+            },
+        ],
+    },
 });
 
 userSchema.pre("save", function (next) {
-  if (this.role !== "driver") this.driverInfo = undefined;
-  if (this.role !== "parent") this.parentInfo = undefined;
-  next();
+    if (this.role !== "driver") this.driverInfo = undefined;
+    if (this.role !== "parent") this.parentInfo = undefined;
+    next();
 });
 
 export default mongoose.model("User", userSchema);

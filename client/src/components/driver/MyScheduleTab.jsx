@@ -1,17 +1,29 @@
 import classNames from "classnames/bind";
 import styles from "../../assets/css/driver/MyScheduleTab.module.scss";
-
 import { useNavigate } from "react-router-dom";
+import toast, { Toaster } from "react-hot-toast";
 
 const cx = classNames.bind(styles);
-const MyScheduleTab = ({ buses, route }) => {
+
+const MyScheduleTab = ({ buses, routes }) => {
     const navigate = useNavigate();
 
-    console.log("Prop 'route' trong MyScheduleTab:", route);
+    const handleClickBus = (trip) => {
+        if (trip.busStatus !== "Đang chạy") {
+            toast.error(
+                `Xe ${trip.busNumber} hiện đang ở trạng thái "${trip.busStatus}". Chỉ xe "Đang chạy" mới có thể theo dõi.`
+            );
+            return;
+        }
 
-    const routeCoords = {
-        lat: route?.latitude,
-        lng: route?.longitude,
+        const routeCoords = {
+            lat: routes[trip.routeNumber]?.latitude,
+            lng: routes[trip.routeNumber]?.longitude,
+        };
+
+        navigate(`/tracking/${trip.busNumber}`, {
+            state: { endAddress: routeCoords },
+        });
     };
 
     return (
@@ -21,30 +33,37 @@ const MyScheduleTab = ({ buses, route }) => {
                 <thead>
                     <tr>
                         <th>Chuyến</th>
+                        <th>Số xe</th>
                         <th>Tuyến đường</th>
-                        <th>Student</th>
+                        <th>Học sinh</th>
                         <th>Trạng thái</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {buses?.map((trip) => (
-                        <tr
-                            key={trip._id}
-                            onClick={() =>
-                                navigate(`/tracking/${trip.busNumber}`, {
-                                    state: { endAddress: routeCoords },
-                                })
-                            }
-                            className={cx("clickable-row")}
-                        >
-                            <td>{trip.routeNumber}</td>
-                            <td>{route?.name || "N/A"}</td>
-                            <td>{trip.students?.length}</td>
-                            <td>{trip.busStatus}</td>
-                        </tr>
-                    ))}
+                    {buses?.map((trip) => {
+                        const routeData = routes[trip.routeNumber];
+                        return (
+                            <tr
+                                key={trip._id}
+                                onClick={() => handleClickBus(trip)}
+                                className={cx("clickable-row", {
+                                    inactive: trip.busStatus !== "Đang chạy",
+                                })}
+                            >
+                                <td>{trip.routeNumber}</td>
+                                <td>{trip.busNumber}</td>
+                                <td>
+                                    {routeData?.name || "Không tìm thấy tuyến"}
+                                </td>
+                                <td>{trip.students?.length || 0}</td>
+                                <td>{trip.busStatus}</td>
+                            </tr>
+                        );
+                    })}
                 </tbody>
             </table>
+
+            <Toaster position="top-right" reverseOrder={false} />
         </div>
     );
 };
