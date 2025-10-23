@@ -425,9 +425,21 @@ export const sendMessage = async (req, res) => {
         recipient.messageHistory.push(newMessage);
         await recipient.save();
 
+        // Thêm đoạn này
+        if (!sender.messageHistory) sender.messageHistory = [];
+        sender.messageHistory.push({
+            recipientId: recipient._id,
+            recipientName: recipient.fullName,
+            recipientRole: recipient.role,
+            content,
+            messageType: messageType || "general",
+            sentAt: new Date(),
+        });
+        await sender.save();
+
         res.json({
             success: true,
-            message: "Gửi tin nhắn thành công và đã lưu vào DB!",
+            message: "Gửi tin nhắn thành công !",
             data: newMessage,
         });
     } catch (error) {
@@ -474,7 +486,15 @@ export const sendMessageToRole = async (req, res) => {
                 await u.save();
             })
         );
-
+        // Lưu tin nhắn vào lịch sử của người gửi (manager)
+        if (!sender.messageHistory) sender.messageHistory = [];
+        sender.messageHistory.push({
+            recipientRole: role,
+            content,
+            messageType: messageType || "general",
+            sentAt: new Date(),
+        });
+        await sender.save();
         res.json({
             success: true,
             message: `Đã gửi tin nhắn đến tất cả người dùng role: ${role}`,
@@ -512,6 +532,60 @@ export const getMessageHistory = async (req, res) => {
         });
     } catch (error) {
         console.error("Get message history error:", error);
+        res.json({ success: false, message: error.message });
+    }
+};
+
+//  DRIVER SEND MESSAGE
+export const sendReportMessage = async (req, res) => {
+    try {
+        const { senderId, bus, type, note, image } = req.body;
+
+        const sender = await User.findById(senderId);
+        if (!sender || sender.role !== "driver") {
+            return res.json({
+                success: false,
+                message: "Không tìm thấy tài xế gửi báo cáo",
+            });
+        }
+
+        const managerId = "68e4c6bf6f48e0048585b5bc";
+        const manager = await User.findById(managerId);
+        if (!manager) {
+            return res.json({
+                success: false,
+                message: "Không tìm thấy tài khoản quản lý để nhận báo cáo",
+            });
+        }
+
+        const newMessage = {
+            senderId,
+            senderName: sender.fullName,
+            senderRole: "driver",
+            recipientId: manager._id,
+            recipientName: manager.fullName,
+            recipientRole: "manager",
+            messageType: "report",
+            content: `Báo cáo từ tài xế ${sender.fullName} (${bus}): ${note} (${type})`,
+            image, // base64 string
+            sentAt: new Date(),
+        };
+
+        if (!manager.messageHistory) manager.messageHistory = [];
+        manager.messageHistory.push(newMessage);
+        await manager.save();
+
+        if (!sender.messageHistory) sender.messageHistory = [];
+        sender.messageHistory.push(newMessage);
+        await sender.save();
+
+        res.json({
+            success: true,
+            message: "Đã gửi báo cáo và lưu lịch sử cho cả tài xế và quản lý",
+            data: newMessage,
+        });
+    } catch (error) {
+        console.error("Send report error:", error);
         res.json({ success: false, message: error.message });
     }
 };

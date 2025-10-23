@@ -13,7 +13,7 @@ import {
     sendMessage,
     sendMessageToRole,
     getMessageHistory,
-    // findStudentsByStudentNumber,
+    sendReportMessage,
 } from "../controllers/UserController.js";
 
 const userRouter = express.Router();
@@ -34,10 +34,9 @@ userRouter.put("/student/:studentId/bus", updateStudentBus);
 userRouter.post("/send-message/:userId", sendMessage);
 userRouter.post("/send-message-to-role", sendMessageToRole);
 userRouter.get("/message-history/:userId", getMessageHistory);
-// userRouter.get(
-//   "/find-student-by-studentNumber/:studentNumber",
-//   findStudentsByStudentNumber
-// );
+
+userRouter.post("/report", sendReportMessage);
 
 userRouter.put("/update-student/:parentPhone", updateParentInfo);
+
 export default userRouter;

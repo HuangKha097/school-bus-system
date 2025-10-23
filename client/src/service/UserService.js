@@ -131,3 +131,16 @@ export const getMessageHistory = async (userId) => {
         throw error;
     }
 };
+
+export const sendReport = async (reportData) => {
+    try {
+        const res = await axios.post(
+            "http://localhost:5000/api/user/report",
+            reportData
+        );
+        return res.data;
+    } catch (error) {
+        console.error("Send report error:", error);
+        throw error;
+    }
+};

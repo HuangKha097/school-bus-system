@@ -225,3 +225,20 @@ h3 {
         --gradient-angle: 360deg;
     }
 }
+.image-wrapper {
+    margin-top: 8px;
+    display: flex;
+    justify-content: flex-start;
+}
+
+.message-image {
+    width: 120px;
+    height: auto;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.message-image:hover {
+    transform: scale(1.05);
+}

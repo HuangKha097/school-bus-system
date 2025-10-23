@@ -193,7 +193,10 @@ const DriverPage = ({ role, setRole, userName, userId }) => {
                             }
                         />
 
-                        <Route path="/report" element={<ReportTab />} />
+                        <Route
+                            path="/report"
+                            element={<ReportTab buses={buses} />}
+                        />
                     </Routes>
                 </div>
             </div>

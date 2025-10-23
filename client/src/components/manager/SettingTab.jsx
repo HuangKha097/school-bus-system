@@ -13,8 +13,6 @@ export default function SettingsTab() {
     });
 
     const handleSave = async () => {
-        // Lưu setting vào localStorage hoặc API
-        // localStorage.setItem("appSettings", JSON.stringify(appearance));
         alert("Cài đặt đã được lưu!");
     };
 

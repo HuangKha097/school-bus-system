@@ -32,6 +32,7 @@ const userSchema = new mongoose.Schema({
             recipientRole: String,
             content: String,
             messageType: String,
+            image: String,
             sentAt: { type: Date, default: Date.now },
         },
     ],
