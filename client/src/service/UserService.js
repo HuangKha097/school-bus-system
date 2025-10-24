@@ -150,3 +150,15 @@ export const sendReport = async (reportData) => {
     throw error;
   }
 };
+
+export const deleteMessage = async (userId, messageId) => {
+  try {
+    const res = await axios.delete(
+      `http://localhost:5000/api/user/message/${userId}/${messageId}`
+    );
+    return res.data;
+  } catch (error) {
+    console.error("Delete message error:", error);
+    throw error;
+  }
+};

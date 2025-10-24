@@ -5,11 +5,8 @@ import { jwtDecode } from "jwt-decode";
 import * as UserService from "../../service/UserService.js";
 
 const cx = classNames.bind(styles);
-
 const API_KEY = import.meta.env.VITE_OPENROUTER_KEY;
 const MODEL_URL = "https://openrouter.ai/api/v1/chat/completions";
-
-if (!API_KEY) console.error("Thiếu API Key cho OpenRouter");
 
 const MessageTab = () => {
   const token = localStorage.getItem("token");
@@ -24,7 +21,6 @@ const MessageTab = () => {
   const [aiError, setAiError] = useState(null);
   const [sendError, setSendError] = useState(null);
 
-  // Lấy lịch sử tin nhắn
   useEffect(() => {
     const fetchHistoryMessage = async () => {
       try {
@@ -42,7 +38,6 @@ const MessageTab = () => {
     fetchHistoryMessage();
   }, []);
 
-  // Lấy danh sách người nhận
   useEffect(() => {
     const fetchRecipients = async () => {
       if (targetRole === "parent" || targetRole === "driver") {
@@ -61,7 +56,6 @@ const MessageTab = () => {
     setTargetRecipient("");
   }, [targetRole]);
 
-  // Gửi tin nhắn
   const handleSend = async (e) => {
     e.preventDefault();
     setIsSending(true);
@@ -76,7 +70,6 @@ const MessageTab = () => {
     try {
       const decodedToken = jwtDecode(token);
       const senderId = decodedToken.userId;
-
       let res;
       const isSendToAll =
         targetRole === "all_parents" || targetRole === "all_drivers";
@@ -119,7 +112,6 @@ const MessageTab = () => {
     }
   };
 
-  // AI tạo nội dung gợi ý
   const handleAiGenerate = async (e) => {
     e.preventDefault();
     if (!API_KEY) {
@@ -139,14 +131,10 @@ const MessageTab = () => {
     const targetDescription = recipientText || targetRoleText;
 
     const systemPrompt = `Bạn là trợ lý ảo của hệ thống trường trung học cơ sở.
-
-
     Soạn tin nhắn thông báo ngắn gọn, trang trọng bằng tiếng Việt.
     Không thêm lời chào, dấu đặc biệt hoặc ký hiệu.`;
 
     const userPrompt = `Loại thông báo: "${messageTypeText}"
-
-
     Người nhận: "${targetDescription}"
     Hãy viết nội dung tin nhắn tối thiểu 15 từ, rõ ràng và lịch sự.`;
 
@@ -180,6 +168,27 @@ const MessageTab = () => {
     }
   };
 
+  const handleDeleteMessage = async (messageId) => {
+    if (!token) return alert("Bạn chưa đăng nhập!");
+    if (!window.confirm("Bạn có chắc muốn xóa tin nhắn này không?")) return;
+    try {
+      const decodedToken = jwtDecode(token);
+      const userId = decodedToken.userId;
+      const res = await UserService.deleteMessage(userId, messageId);
+      if (res?.success) {
+        alert("Xóa tin nhắn thành công!");
+        setHistoryMessage((prev) =>
+          prev.filter((msg) => msg._id !== messageId)
+        );
+      } else {
+        alert(res?.message || "Không thể xóa tin nhắn!");
+      }
+    } catch (error) {
+      console.error("Delete message error:", error);
+      alert("Có lỗi xảy ra khi xóa tin nhắn.");
+    }
+  };
+
   return (
     <div className={cx("tab-wrapper")}>
       <div className={cx("left-block")}>
@@ -200,7 +209,6 @@ const MessageTab = () => {
                     </span>
                   </div>
                   <div className={cx("item-body")}>{item.content}</div>
-
                   {item.image && (
                     <div className={cx("image-wrapper")}>
                       <img
@@ -211,6 +219,14 @@ const MessageTab = () => {
                       />
                     </div>
                   )}
+                  <div className={cx("item-footer")}>
+                    <button
+                      className={cx("delete-btn")}
+                      onClick={() => handleDeleteMessage(item._id)}
+                    >
+                      &times; Xóa
+                    </button>
+                  </div>
                 </li>
               ))
             )}

@@ -587,6 +587,51 @@ export const getMessageHistory = async (req, res) => {
   }
 };
 
+export const deleteMessageById = async (req, res) => {
+  try {
+    const { userId, messageId } = req.params;
+
+    if (!userId || !messageId) {
+      return res.json({
+        success: false,
+        message: "Thiếu userId hoặc messageId",
+      });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.json({
+        success: false,
+        message: "Không tìm thấy người dùng",
+      });
+    }
+
+    // Xóa 1 message theo messageId trong mảng messageHistory
+    const initialLength = user.messageHistory?.length || 0;
+    user.messageHistory = (user.messageHistory || []).filter(
+      (msg, index) => msg._id?.toString() !== messageId
+    );
+
+    // Nếu không thay đổi độ dài thi messageId không tồn tại
+    if (user.messageHistory.length === initialLength) {
+      return res.json({
+        success: false,
+        message: "Không tìm thấy tin nhắn cần xóa",
+      });
+    }
+
+    await user.save();
+
+    res.json({
+      success: true,
+      message: "Xóa tin nhắn thành công",
+    });
+  } catch (error) {
+    console.error("Delete message error:", error);
+    res.json({ success: false, message: error.message });
+  }
+};
+
 //  DRIVER SEND MESSAGE
 export const sendReportMessage = async (req, res) => {
   try {
