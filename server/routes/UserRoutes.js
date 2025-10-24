@@ -1,19 +1,20 @@
 import express from "express";
 import {
-    findDriverByDriverNumber,
-    getUserByRole,
-    login,
-    signUp,
-    updateDriverInfo,
-    findStudentsByGrade,
-    updateParentInfo,
-    findDriverByStatus,
-    getUserById,
-    updateStudentBus,
-    sendMessage,
-    sendMessageToRole,
-    getMessageHistory,
-    sendReportMessage,
+  findDriverByDriverNumber,
+  getUserByRole,
+  login,
+  signUp,
+  updateDriverInfo,
+  findStudentsByGrade,
+  updateParentInfo,
+  findDriverByStatus,
+  getUserById,
+  updateStudentBus,
+  sendMessage,
+  sendMessageToRole,
+  getMessageHistory,
+  sendReportMessage,
+  findStudentsByStudentNumber,
 } from "../controllers/UserController.js";
 
 const userRouter = express.Router();
@@ -24,11 +25,16 @@ userRouter.get("/get-user-by-role", getUserByRole);
 userRouter.get("/get-user-by-id", getUserById);
 userRouter.put("/update-driver/:userId", updateDriverInfo);
 userRouter.get(
-    "/find-driver-by-driver-number/:driverNumber",
-    findDriverByDriverNumber
+  "/find-driver-by-driver-number/:driverNumber",
+  findDriverByDriverNumber
 );
 userRouter.get("/find-driver-by-status/:status", findDriverByStatus);
 userRouter.get("/find-students-by-grade/:grade", findStudentsByGrade);
+userRouter.get(
+  "/find-students-by-student-number/:studentNumber",
+  findStudentsByStudentNumber
+);
+
 userRouter.put("/student/:studentId/bus", updateStudentBus);
 
 userRouter.post("/send-message/:userId", sendMessage);
