@@ -135,7 +135,7 @@ const DashboardTab = ({ user }) => {
                             <h4>
                                 {selectedChild.registeredBus
                                     ? bus?.busNumber
-                                    : "N/A"}
+                                    : "No bus"}
                             </h4>
                         </div>
                         <div className={cx("card", "info-card")}>

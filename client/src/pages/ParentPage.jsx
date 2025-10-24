@@ -19,7 +19,7 @@ const ParentPage = ({ role, setRole, userName, userId }) => {
     useEffect(() => {
         const fetchUser = async () => {
             try {
-                const result = await UserService.getUserByUserId(userId);
+                const result = await UserService.getUserById(userId);
                 console.log("====================================");
                 console.log(result?.data?.[0]);
                 setUser(result?.data?.[0]);
