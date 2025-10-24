@@ -3,6 +3,7 @@ import ManagerPage from "./pages/ManagerPage";
 import ParentPage from "./pages/ParentPage";
 import DriverPage from "./pages/DriverPage";
 import LoginPage from "./pages/LoginPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import { jwtDecode } from "jwt-decode";
 import { Routes, Route, Navigate } from "react-router-dom";
 
@@ -43,6 +44,10 @@ function App() {
                     <Route
                         path="/login"
                         element={<LoginPage setRole={setRole} />}
+                    />
+                    <Route
+                        path="/forgot-password"
+                        element={<ForgotPasswordPage />}
                     />
                     <Route
                         path="*"

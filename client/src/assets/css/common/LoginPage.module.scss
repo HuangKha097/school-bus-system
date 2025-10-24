@@ -3,23 +3,24 @@
     align-items: center;
     justify-content: center;
     min-height: 100vh;
-    background: #f5f6fa;
+    background: #431fa8;
+    background: linear-gradient(135deg, #381fa8, rgb(30, 41, 57));
 }
 
 .card {
     width: 100%;
-    max-width: 36rem; // 360px
+    max-width: 36rem;
     background: #fff;
-    border-radius: 1.6rem; // 16px
-    padding: 3.2rem; // 32px
+    border-radius: 0.8rem;
+    padding: 3.2rem;
     box-shadow: 0 0.4rem 1.2rem rgba(0, 0, 0, 0.1);
 }
 
 .title {
-    font-size: 2.6rem; // 26px (to hơn chút so với 22px)
+    font-size: 2.6rem;
     font-weight: 700;
     text-align: center;
-    margin-bottom: 2.4rem; // 24px
+    margin-bottom: 2.4rem;
     color: #333;
 }
 
@@ -30,17 +31,23 @@
 }
 
 .label {
-    font-size: 1.6rem; // 16px (to hơn trước)
-    font-weight: 600; // nhấn mạnh
+    font-size: 1.6rem;
+    font-weight: 600;
     margin-bottom: 0.6rem;
     display: flex;
     flex-direction: column;
     color: #444;
 }
 
+.subtitle {
+    font-size: 1.6rem;
+    font-weight: 600;
+    margin-bottom: 2rem;
+    color: #333;
+}
 .input {
     width: 100%;
-    padding: 1.2rem 1.6rem; // rộng hơn 12px, 14px
+    padding: 1.2rem 1.6rem;
     border: 0.1rem solid #ccc;
     border-radius: 0.8rem;
     font-size: 1.6rem; // 16px
@@ -60,7 +67,6 @@
     color: #fff;
     font-size: 1.6rem;
     font-weight: 600; // nhấn mạnh nút bấm
-    border: none;
     border-radius: 0.8rem;
     cursor: pointer;
     transition: background 0.2s ease;
