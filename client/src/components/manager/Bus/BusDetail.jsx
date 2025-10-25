@@ -238,7 +238,9 @@ const BusDetail = ({ busDetail, setBusDetail }) => {
         setStudentPopUp(null);
         return;
       }
-      const students = UserController.findStudents(searchValue);
+      // "ok" vi ham can doi so ActiveFirst && logic
+      const students = await UserController.findStudents("ok", searchValue);
+
       const filterStudents = students.filter(
         (s) => !studentsSelected.some((sel) => sel._id === s._id)
       );

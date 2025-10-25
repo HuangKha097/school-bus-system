@@ -23,10 +23,9 @@ export const fetchUserById = async (userId) => {
 export const updateDriver = async (userId, driverUpdate) => {
   try {
     const res = await UserService.updateDriverInfo(userId, driverUpdate);
-    console.log(res?.data);
+    return res;
   } catch (error) {
     console.error(error);
-    toast.error(error);
   }
 };
 
@@ -48,7 +47,7 @@ export const getDriverData = async (valueFilter, searchValue) => {
   }
 };
 
-export const findStudents = async (valueFilter = true, searchValue) => {
+export const findStudents = async (valueFilter, searchValue) => {
   try {
     let res;
     valueFilter
