@@ -7,6 +7,8 @@ import Filter from "../../../components/Filter.jsx";
 import * as BusService from "../../../service/BusService.js";
 import * as RouteService from "../../../service/RouteService.js";
 import * as UserService from "../../../service/UserService.js";
+import * as UserController from "../../../controller/UserController.js";
+
 import toast, { Toaster } from "react-hot-toast";
 
 const cx = classNames.bind(styles);
@@ -28,15 +30,11 @@ const BusDetail = ({ busDetail, setBusDetail }) => {
   const [studentPopUp, setStudentPopUp] = useState([]);
 
   useEffect(() => {
-    const fetchDrivers = async () => {
-      try {
-        const res = await UserService.getUserByRole("driver");
-        setDriver(res?.data);
-      } catch (error) {
-        console.log(error);
-      }
+    const fetchDriver = async () => {
+      const drivers = await UserController.fetchUserByRole("driver");
+      setDriver(drivers);
     };
-    fetchDrivers();
+    fetchDriver();
   }, []);
 
   useEffect(() => {
@@ -78,8 +76,7 @@ const BusDetail = ({ busDetail, setBusDetail }) => {
 
       if (driverId) {
         // Lấy thông tin tài xế hiện tại
-        const driverRes = await UserService.getUserById(driverId);
-        const driver = driverRes?.data?.[0];
+        const driver = UserController.fetchUserById(driverId);
         const currentAssignedBus = driver?.driverInfo?.assignedBus || [];
 
         // Tìm xe đang chạy
@@ -141,7 +138,7 @@ const BusDetail = ({ busDetail, setBusDetail }) => {
           }
 
           // Gửi toàn bộ mảng sau khi merge
-          await UserService.updateDriverInfo(driverId, {
+          UserController.updateDriver(driverId, {
             assignedBus: updateAssignedBus,
           });
 
@@ -190,7 +187,7 @@ const BusDetail = ({ busDetail, setBusDetail }) => {
 
       if (res?.success) {
         if (busDetail.driver?._id) {
-          await UserService.updateDriverInfo(busDetail.driver._id, {
+          UserController.updateDriver(busDetail.driver._id, {
             assignedBus: [],
           });
         }
@@ -241,15 +238,12 @@ const BusDetail = ({ busDetail, setBusDetail }) => {
         setStudentPopUp(null);
         return;
       }
-      const res = await UserService.findStudentsByGrade(searchValue);
-      console.log("res: ", res?.students);
-      const filterStudents = res?.students?.filter(
+      const students = UserController.findStudents(searchValue);
+      const filterStudents = students.filter(
         (s) => !studentsSelected.some((sel) => sel._id === s._id)
       );
-
-      if (res?.success && res?.students) {
+      if (students) {
         const mergedStudents = [...filterStudents, ...studentsSelected];
-
         setStudentPopUp(mergedStudents);
       } else {
         setStudentPopUp(null);
@@ -263,9 +257,7 @@ const BusDetail = ({ busDetail, setBusDetail }) => {
   useEffect(() => {
     setBusUpdate({
       ...busDetail,
-
       driver: busDetail.driver?._id || busDetail.driver || null,
-
       students: busDetail.students || [],
     });
 

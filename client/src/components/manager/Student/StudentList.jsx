@@ -55,9 +55,8 @@ const StudentList = ({
     }
     return students;
   }, [studentPopUp, student, students]);
-  console.log("====================================");
+
   console.log("display: ", displayStudents);
-  console.log("====================================");
 
   //  xử lý chọn/bỏ chọn 1 học sinh
   const handleSelectStudent = (student) => {

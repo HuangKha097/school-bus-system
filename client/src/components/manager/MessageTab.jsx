@@ -6,7 +6,7 @@ import * as UserService from "../../service/UserService.js";
 
 const cx = classNames.bind(styles);
 const API_KEY = import.meta.env.VITE_OPENROUTER_KEY;
-const MODEL_URL = "https://openrouter.ai/api/v1/chat/completions";
+const MODEL_URL = import.meta.env.VITE_MODEL_UR;
 
 const MessageTab = () => {
   const token = localStorage.getItem("token");
