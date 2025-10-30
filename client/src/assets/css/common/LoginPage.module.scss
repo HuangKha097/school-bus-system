@@ -1,0 +1,106 @@
+.wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: #431fa8;
+  background: linear-gradient(135deg, #381fa8, rgb(30, 41, 57));
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  width: 100%;
+  max-width: 46rem;
+  background: #fff;
+  border-radius: 0.8rem;
+  padding: 3.2rem;
+  box-shadow: 0 0.4rem 1.2rem rgba(0, 0, 0, 0.1);
+}
+
+.title {
+  font-size: 4rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 2.4rem;
+  color: #333;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem; // 18px
+}
+
+.label {
+  font-size: 1.6rem;
+  font-weight: 600;
+  margin-bottom: 0.6rem;
+  display: flex;
+  flex-direction: column;
+  color: #444;
+}
+
+.subtitle {
+  font-size: 1.6rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+  color: #333;
+}
+.input {
+  width: 100%;
+  padding: 1.2rem 1.6rem;
+  border: 0.1rem solid #ccc;
+  border-radius: 0.8rem;
+  font-size: 1.6rem; // 16px
+  font-weight: 500;
+  outline: none;
+  transition: border-color 0.2s ease;
+
+  &:focus {
+    border-color: #2563eb;
+  }
+}
+
+.button {
+  width: 100%;
+  padding: 1.6rem; // 14px
+  background: rgb(30, 41, 57);
+  color: #fff;
+  font-size: 1.6rem;
+  font-weight: 600; // nhấn mạnh nút bấm
+  border-radius: 0.8rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: rgba(30, 41, 57, 0.85);
+  }
+}
+
+.forgotWrapper {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.6rem;
+}
+
+.forgotLink {
+  margin-top: 2rem;
+  font-size: 1.6rem;
+  font-weight: 500;
+  color: #2563eb;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: #1d4ed8;
+    text-decoration: underline;
+  }
+}
+.hot-line {
+  text-align: start;
+  font-size: 1.6rem;
+  color: #b72f2f;
+}

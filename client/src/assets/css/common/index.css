@@ -1,0 +1,45 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
+
+* {
+    box-sizing: border-box;
+}
+
+:root {
+}
+
+/* Common */
+button {
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0px 1000px transparent inset !important; /* màu nền khớp theme */
+    -webkit-text-fill-color: #fff !important; /* chữ trắng */
+    caret-color: #fff; /* con trỏ gõ chữ cũng trắng */
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+a {
+    text-decoration: none;
+    color: unset;
+}
+
+li {
+    list-style: none;
+}
+
+/*  */
+html {
+    font-size: 62.5%;
+}
+
+body {
+    font-family: "Inter", sans-serif;
+    font-size: 1.6rem;
+    background-color: #333;
+}
+
+.container {
+}

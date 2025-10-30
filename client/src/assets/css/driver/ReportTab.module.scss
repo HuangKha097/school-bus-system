@@ -1,0 +1,95 @@
+.report-wrapper {
+    padding: 2.5rem;
+    background-color: #ffffff;
+    border-radius: 0.8rem;
+    box-shadow: 0 0.4rem 1.2rem rgba(0, 0, 0, 0.05);
+
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+}
+
+h2 {
+    margin-bottom: 2rem;
+    font-size: 2.4rem;
+    font-weight: 600;
+    color: #333;
+    text-align: left;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.6rem;
+
+    label {
+        display: flex;
+        flex-direction: column;
+        font-weight: 600;
+        font-size: 1.6rem;
+        color: #444;
+    }
+
+    select,
+    textarea,
+    input[type="file"] {
+        margin-top: 0.8rem;
+        padding: 1.2rem;
+        border-radius: 0.6rem;
+        border: 0.1rem solid #dcdcdc;
+        background-color: #f9f9f9;
+        font-size: 1.6rem;
+        font-family: inherit;
+        transition: border-color 0.2s, box-shadow 0.2s;
+
+        &:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.2);
+            background-color: #fff;
+        }
+    }
+
+    textarea {
+        resize: vertical;
+        min-height: 14rem;
+    }
+
+    input[type="file"] {
+        background-color: #fff;
+        padding: 0.8rem;
+    }
+
+    .btn-submit {
+        align-self: flex-start;
+        background-color: #007bff;
+        color: white;
+        font-size: 1.6rem;
+        font-weight: 600;
+        padding: 1.2rem 2rem;
+        border-radius: 0.6rem;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &:hover {
+            background-color: #0056b3;
+        }
+
+        &:active {
+            transform: scale(0.98);
+        }
+    }
+}
+
+.preview {
+    margin-top: 1rem;
+
+    .preview-img {
+        width: 20rem;
+        height: auto;
+        border-radius: 0.8rem;
+        border: 0.1rem solid #ddd;
+        box-shadow: 0 0.2rem 0.6rem rgba(0, 0, 0, 0.05);
+    }
+}

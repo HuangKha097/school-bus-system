@@ -1,0 +1,30 @@
+.filter {
+    .filter-tag:first-child {
+        margin-right: 1rem;
+    }
+    .filter-tag {
+        display: inline-block;
+        background-color: #d5e8fd;
+        padding: 0.6rem 1rem;
+        border-radius: 0.4rem;
+        cursor: pointer;
+        color: #333;
+        font-weight: 500;
+        user-select: none;
+        transition: all 0.2s ease-in-out;
+        box-shadow: 0 0 0 0 transparent;
+
+        &:hover {
+            background-color: #c7e0fc;
+            transform: scale(1.02);
+        }
+
+        &.active {
+            background-color: #5da9fa;
+            color: white;
+            font-weight: 600;
+            transform: scale(1.1);
+            box-shadow: 0 0 6px rgba(0, 123, 255, 0.5);
+        }
+    }
+}
